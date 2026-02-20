@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { getChatMessages, CURRENT_USER_ID } from '@/data/chats';
-import { getChatRoomById } from '@/lib/api';
+import { getChatRoomById, clearChatUnread } from '@/lib/api';
 import { formatPrice } from '@/lib/format';
 import { STORAGE_KEYS } from '@/lib/constants';
 import type { ChatMessage } from '@/lib/types';
@@ -22,8 +22,9 @@ export default function ChatDetailPage() {
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // 메시지 로드 (mock + localStorage)
+  // 메시지 로드 (mock + localStorage) + 안읽음 초기화
   useEffect(() => {
+    clearChatUnread(roomId);
     const mockMessages = getChatMessages(roomId);
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.CHAT_MESSAGES);

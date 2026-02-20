@@ -1,7 +1,9 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { getUnreadChatCount } from '@/lib/api';
 
 const navItems = [
   { href: '/', label: '홈', icon: (active: boolean) => <svg width="22" height="22" viewBox="0 0 24 24" fill={active ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg> },
@@ -13,6 +15,11 @@ const navItems = [
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const [chatUnread, setChatUnread] = useState(0);
+
+  useEffect(() => {
+    setChatUnread(getUnreadChatCount());
+  }, [pathname]);
 
   return (
     <nav aria-label="하단 메뉴" className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background md:hidden">
@@ -25,9 +32,14 @@ export default function BottomNav() {
               href={item.href}
               aria-label={item.label}
               aria-current={isActive ? 'page' : undefined}
-              className={`flex flex-col items-center gap-0.5 ${isActive ? 'text-blue-500' : 'text-muted-foreground'}`}
+              className={`relative flex flex-col items-center gap-0.5 ${isActive ? 'text-blue-500' : 'text-muted-foreground'}`}
             >
               {item.icon(isActive)}
+              {item.href === '/chat' && chatUnread > 0 && (
+                <span className="absolute -right-1.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                  {chatUnread > 99 ? '99+' : chatUnread}
+                </span>
+              )}
               <span className="text-[10px]">{item.label}</span>
             </Link>
           );

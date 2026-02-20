@@ -296,8 +296,29 @@ function getLocalChatRooms(): ChatRoom[] {
   } catch { return []; }
 }
 
+// 채팅방 unread 오버라이드 관리
+function getChatOverrides(): Record<string, Partial<ChatRoom>> {
+  if (typeof window === 'undefined') return {};
+  try {
+    const saved = localStorage.getItem('campulist_chat_overrides');
+    return saved ? JSON.parse(saved) : {};
+  } catch { return {}; }
+}
+
+function saveChatOverrides(overrides: Record<string, Partial<ChatRoom>>): void {
+  try {
+    localStorage.setItem('campulist_chat_overrides', JSON.stringify(overrides));
+  } catch { /* storage full */ }
+}
+
 export function getAllChatRooms(): ChatRoom[] {
-  return [...mockChatRooms, ...getLocalChatRooms()];
+  const rooms = [...mockChatRooms, ...getLocalChatRooms()];
+  const overrides = getChatOverrides();
+  if (Object.keys(overrides).length === 0) return rooms;
+  return rooms.map(r => {
+    const override = overrides[r.id];
+    return override ? { ...r, ...override } : r;
+  });
 }
 
 export function getChatRoomById(roomId: string): ChatRoom | null {
@@ -335,6 +356,29 @@ export function createChatRoom(input: {
   } catch { /* storage full */ }
 
   return room;
+}
+
+// 채팅 안읽음 수 합산
+export function getUnreadChatCount(): number {
+  return getAllChatRooms().reduce((sum, r) => sum + r.unreadCount, 0);
+}
+
+// 채팅방 안읽음 초기화
+export function clearChatUnread(roomId: string): void {
+  const overrides = getChatOverrides();
+  overrides[roomId] = { ...overrides[roomId], unreadCount: 0 };
+  saveChatOverrides(overrides);
+}
+
+// 알림 안읽음 수 (mock 기본값 + localStorage 읽음 상태 반영)
+export function getUnreadNotificationCount(): number {
+  if (typeof window === 'undefined') return 0;
+  try {
+    const readIds: string[] = JSON.parse(localStorage.getItem(STORAGE_KEYS.NOTIFICATION_READ) || '[]');
+    // mock 알림 중 기본 isRead=false이고 localStorage에서도 읽지 않은 것
+    const mockUnread = ['n1', 'n2']; // mock에서 isRead: false인 알림 ID
+    return mockUnread.filter(id => !readIds.includes(id)).length;
+  } catch { return 0; }
 }
 
 // 조회수 증가 (세션당 1회만)
