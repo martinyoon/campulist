@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import type { ReportReason } from '@/lib/types';
+import { STORAGE_KEYS } from '@/lib/constants';
 
 interface ReportDialogProps {
   postId: string;
@@ -17,17 +18,49 @@ const REPORT_REASONS: { value: ReportReason; label: string }[] = [
   { value: 'other', label: '기타' },
 ];
 
+function getReportedPostIds(): string[] {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.REPORTS) || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function saveReport(postId: string, reason: ReportReason, description: string): void {
+  const ids = getReportedPostIds();
+  if (!ids.includes(postId)) {
+    ids.push(postId);
+    localStorage.setItem(STORAGE_KEYS.REPORTS, JSON.stringify(ids));
+  }
+  console.log('신고 접수:', { postId, reason, description });
+}
+
 export default function ReportDialog({ postId, onClose }: ReportDialogProps) {
   const [reason, setReason] = useState<ReportReason | null>(null);
   const [description, setDescription] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const alreadyReported = getReportedPostIds().includes(postId);
 
   const handleSubmit = () => {
     if (!reason) return;
-    // Phase A: Mock 신고 처리
-    console.log('신고 접수:', { postId, reason, description });
+    saveReport(postId, reason, description);
     setSubmitted(true);
   };
+
+  if (alreadyReported) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
+        <div className="mx-4 w-full max-w-sm rounded-xl bg-background p-6 text-center" onClick={e => e.stopPropagation()}>
+          <div className="text-4xl">⚠️</div>
+          <h3 className="mt-3 text-lg font-bold">이미 신고한 게시글입니다</h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            동일한 게시글은 한 번만 신고할 수 있습니다.
+          </p>
+          <Button onClick={onClose} className="mt-4 w-full">확인</Button>
+        </div>
+      </div>
+    );
+  }
 
   if (submitted) {
     return (

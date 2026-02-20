@@ -49,11 +49,14 @@ export default function Header() {
               ))}
               <div className="my-2 border-t border-border" />
               <p className="text-sm font-semibold text-muted-foreground">카테고리</p>
-              {majorCategories.map(cat => (
-                <Link key={cat.slug} href={`/snu/${cat.slug}`} className="text-base hover:text-blue-500">
-                  {cat.icon} {cat.name}
-                </Link>
-              ))}
+              {majorCategories.map(cat => {
+                const uniSlug = universities.find(u => pathname.startsWith(`/${u.slug}`))?.slug || universities[0]?.slug || 'snu';
+                return (
+                  <Link key={cat.slug} href={`/${uniSlug}/${cat.slug}`} className="text-base hover:text-blue-500">
+                    {cat.icon} {cat.name}
+                  </Link>
+                );
+              })}
             </nav>
           </SheetContent>
         </Sheet>

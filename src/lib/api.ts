@@ -329,6 +329,10 @@ export function findChatRoomByPost(postId: string): ChatRoom | null {
   return getAllChatRooms().find(r => r.postId === postId) || null;
 }
 
+export function findChatRoomByUser(userId: string): ChatRoom | null {
+  return getAllChatRooms().find(r => r.otherUser.id === userId) || null;
+}
+
 export function createChatRoom(input: {
   postId: string;
   postTitle: string;

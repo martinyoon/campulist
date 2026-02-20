@@ -13,6 +13,7 @@ export const STORAGE_KEYS = {
   CHAT_ROOMS: 'campulist_chat_rooms',
   RECENT_VIEWED: 'campulist_recent_viewed',
   NOTIFICATION_READ: 'campulist_notification_read',
+  REPORTS: 'campulist_reports',
 } as const;
 
 export const LIMITS = {

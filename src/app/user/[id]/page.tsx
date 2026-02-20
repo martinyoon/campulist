@@ -7,6 +7,7 @@ import PostCard from '@/components/post/PostCard';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import EmptyState from '@/components/ui/EmptyState';
+import UserChatButton from '@/components/user/UserChatButton';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -87,6 +88,9 @@ export default async function UserProfilePage({ params }: Props) {
             <p className="text-xs text-muted-foreground">게시글</p>
           </div>
         </div>
+
+        {/* 채팅 버튼 (타인 프로필만) */}
+        <UserChatButton user={{ id: user.id, nickname: user.nickname, avatarUrl: user.avatarUrl, isVerified: user.isVerified, mannerTemp: user.mannerTemp, tradeCount: user.tradeCount }} />
       </div>
 
       <Separator />

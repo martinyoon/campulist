@@ -11,6 +11,9 @@ import { formatPrice, formatRelativeTime } from '@/lib/format';
 import type { PostListItem } from '@/lib/types';
 import { STORAGE_KEYS } from '@/lib/constants';
 import { useToast } from '@/components/ui/Toast';
+import { mockUsers } from '@/data/users';
+import { universities } from '@/data/universities';
+import { CURRENT_USER_ID } from '@/data/chats';
 
 type Tab = 'selling' | 'likes' | 'recent' | 'reviews';
 
@@ -30,7 +33,7 @@ export default function MyPage() {
   const [recentPosts, setRecentPosts] = useState<PostListItem[]>([]);
 
   useEffect(() => {
-    setMyPosts(getMyPosts('u1'));
+    setMyPosts(getMyPosts(CURRENT_USER_ID));
     const ids = getLikedPostIds();
     if (ids.length > 0) {
       setLikedPosts(getPostsByIds(ids));
@@ -38,16 +41,18 @@ export default function MyPage() {
     setRecentPosts(getRecentViewedPosts());
   }, []);
 
-  // Mock 현재 사용자 (u1 서연이)
+  // mockUsers에서 현재 사용자 데이터 가져오기
+  const user = mockUsers.find(u => u.id === CURRENT_USER_ID)!;
+  const university = universities.find(u => u.id === user.universityId);
   const currentUser = {
-    id: 'u1',
-    nickname: '서연이',
-    email: 'seo@snu.ac.kr',
-    university: '서울대학교',
-    department: '경영학과',
-    isVerified: true,
-    mannerTemp: 38.2,
-    tradeCount: 12,
+    id: user.id,
+    nickname: user.nickname,
+    email: user.email,
+    university: university?.name ?? '',
+    department: user.department ?? '',
+    isVerified: user.isVerified,
+    mannerTemp: user.mannerTemp,
+    tradeCount: user.tradeCount,
   };
 
   // Mock 후기 데이터
@@ -85,7 +90,7 @@ export default function MyPage() {
             <p className="text-sm text-muted-foreground">{currentUser.university} · {currentUser.department}</p>
             <p className="text-sm text-muted-foreground">{currentUser.email}</p>
           </div>
-          <Link href="/user/u1">
+          <Link href={`/user/${CURRENT_USER_ID}`}>
             <Button variant="outline" size="sm">프로필</Button>
           </Link>
         </div>
