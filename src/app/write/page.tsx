@@ -7,8 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { universities } from '@/data/universities';
 import { majorCategories, getMinorCategories } from '@/data/categories';
-
-const DRAFT_KEY = 'campulist_write_draft';
+import { STORAGE_KEYS } from '@/lib/constants';
 
 interface WriteDraft {
   title: string;
@@ -41,7 +40,7 @@ export default function WritePage() {
   // localStorage에서 임시저장 불러오기
   useEffect(() => {
     try {
-      const saved = localStorage.getItem(DRAFT_KEY);
+      const saved = localStorage.getItem(STORAGE_KEYS.WRITE_DRAFT);
       if (saved) {
         const draft: WriteDraft = JSON.parse(saved);
         setTitle(draft.title || '');
@@ -69,7 +68,7 @@ export default function WritePage() {
     // 모든 필드가 비어있으면 저장하지 않음
     if (!title && !body && !price && !location && tags.length === 0) return;
     try {
-      localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+      localStorage.setItem(STORAGE_KEYS.WRITE_DRAFT, JSON.stringify(draft));
       setLastSaved(draft.savedAt);
     } catch { /* storage full — ignore */ }
   }, [title, body, price, priceNegotiable, universityId, majorId, minorId, tags, location]);
@@ -80,11 +79,12 @@ export default function WritePage() {
   }, [saveDraft]);
 
   const clearDraft = () => {
-    localStorage.removeItem(DRAFT_KEY);
+    localStorage.removeItem(STORAGE_KEYS.WRITE_DRAFT);
     setLastSaved(null);
   };
 
   const minors = majorId ? getMinorCategories(majorId) : [];
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const addTag = () => {
     const t = tagInput.trim();
@@ -94,7 +94,19 @@ export default function WritePage() {
     }
   };
 
+  const validate = (): Record<string, string> => {
+    const errs: Record<string, string> = {};
+    if (!title.trim()) errs.title = '제목을 입력해주세요';
+    if (!body.trim()) errs.body = '내용을 입력해주세요';
+    if (!majorId) errs.category = '카테고리를 선택해주세요';
+    if (price && Number(price) < 0) errs.price = '올바른 가격을 입력해주세요';
+    return errs;
+  };
+
   const handleSubmit = () => {
+    const errs = validate();
+    setErrors(errs);
+    if (Object.keys(errs).length > 0) return;
     // Phase A: 제출 후 임시저장 삭제
     clearDraft();
     alert('시제품 모드: 게시글이 작성되었습니다! (Mock)');
@@ -162,6 +174,7 @@ export default function WritePage() {
               </button>
             ))}
           </div>
+          {errors.category && <p className="mt-1 text-xs text-red-500">{errors.category}</p>}
         </div>
 
         {/* 소분류 */}
@@ -193,6 +206,7 @@ export default function WritePage() {
             onChange={e => setTitle(e.target.value)}
             maxLength={100}
           />
+          {errors.title && <p className="mt-1 text-xs text-red-500">{errors.title}</p>}
         </div>
 
         {/* 가격 */}
@@ -217,6 +231,7 @@ export default function WritePage() {
             />
             가격 협의 가능
           </label>
+          {errors.price && <p className="mt-1 text-xs text-red-500">{errors.price}</p>}
         </div>
 
         {/* 본문 */}
@@ -231,6 +246,7 @@ export default function WritePage() {
             className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
           <p className="mt-1 text-right text-xs text-muted-foreground">{body.length}/5,000</p>
+          {errors.body && <p className="mt-1 text-xs text-red-500">{errors.body}</p>}
         </div>
 
         {/* 이미지 (시제품: UI만) */}

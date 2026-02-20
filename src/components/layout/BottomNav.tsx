@@ -15,7 +15,7 @@ export default function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background md:hidden">
+    <nav aria-label="하단 메뉴" className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background md:hidden">
       <div className="mx-auto flex h-14 max-w-5xl items-center justify-around">
         {navItems.map(item => {
           const isActive = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
@@ -23,6 +23,8 @@ export default function BottomNav() {
             <Link
               key={item.href}
               href={item.href}
+              aria-label={item.label}
+              aria-current={isActive ? 'page' : undefined}
               className={`flex flex-col items-center gap-0.5 ${isActive ? 'text-blue-500' : 'text-muted-foreground'}`}
             >
               {item.icon(isActive)}

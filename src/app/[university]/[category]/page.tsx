@@ -5,6 +5,7 @@ import { getPosts, getUniversityBySlug } from '@/lib/api';
 import { getCategoryBySlug, getMinorCategories } from '@/data/categories';
 import UniversityTabs from '@/components/post/UniversityTabs';
 import PostCard from '@/components/post/PostCard';
+import EmptyState from '@/components/ui/EmptyState';
 import { Badge } from '@/components/ui/badge';
 
 interface Props {
@@ -115,9 +116,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         {posts.length > 0 ? (
           posts.map(post => <PostCard key={post.id} post={post} />)
         ) : (
-          <div className="px-4 py-16 text-center text-muted-foreground">
-            이 카테고리에 게시글이 없습니다.
-          </div>
+          <EmptyState message="이 카테고리에 게시글이 없습니다." actionLabel="글쓰기" actionHref="/write" />
         )}
       </div>
     </div>

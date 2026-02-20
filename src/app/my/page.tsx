@@ -5,16 +5,16 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import EmptyState from '@/components/ui/EmptyState';
 import { mockPosts, toPostListItem } from '@/data/posts';
 import { formatPrice, formatRelativeTime } from '@/lib/format';
+import { STORAGE_KEYS } from '@/lib/constants';
 
 type Tab = 'selling' | 'likes' | 'reviews';
 
-const LIKES_KEY = 'campulist_liked_posts';
-
 function getLikedPostIds(): string[] {
   try {
-    return JSON.parse(localStorage.getItem(LIKES_KEY) || '[]');
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.LIKED_POSTS) || '[]');
   } catch {
     return [];
   }
@@ -154,12 +154,7 @@ export default function MyPage() {
               </Link>
             ))
           ) : (
-            <div className="px-4 py-16 text-center text-muted-foreground">
-              <p>등록한 게시글이 없습니다.</p>
-              <Link href="/write" className="mt-3 inline-block text-sm text-blue-500 hover:text-blue-600">
-                첫 게시글 작성하기 →
-              </Link>
-            </div>
+            <EmptyState message="등록한 게시글이 없습니다." actionLabel="첫 게시글 작성하기" actionHref="/write" />
           )
         )}
 
@@ -187,10 +182,7 @@ export default function MyPage() {
               </Link>
             ))
           ) : (
-            <div className="px-4 py-16 text-center text-muted-foreground">
-              <p>찜한 게시글이 없습니다.</p>
-              <p className="mt-1 text-sm">게시글의 하트 버튼을 눌러 찜해보세요.</p>
-            </div>
+            <EmptyState message="찜한 게시글이 없습니다." sub="게시글의 하트 버튼을 눌러 찜해보세요." />
           )
         )}
 
@@ -219,9 +211,7 @@ export default function MyPage() {
               </div>
             ))
           ) : (
-            <div className="px-4 py-16 text-center text-muted-foreground">
-              받은 후기가 없습니다.
-            </div>
+            <EmptyState message="받은 후기가 없습니다." />
           )
         )}
       </div>

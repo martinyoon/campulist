@@ -2,17 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { STORAGE_KEYS } from '@/lib/constants';
 
 interface LikeButtonProps {
   postId: string;
   initialLiked: boolean;
 }
 
-const LIKES_KEY = 'campulist_liked_posts';
-
 function getLikedPosts(): string[] {
   try {
-    return JSON.parse(localStorage.getItem(LIKES_KEY) || '[]');
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.LIKED_POSTS) || '[]');
   } catch {
     return [];
   }
@@ -34,7 +33,7 @@ export default function LikeButton({ postId, initialLiked }: LikeButtonProps) {
     } else {
       updated = [...likedPosts, postId];
     }
-    localStorage.setItem(LIKES_KEY, JSON.stringify(updated));
+    localStorage.setItem(STORAGE_KEYS.LIKED_POSTS, JSON.stringify(updated));
     setLiked(!liked);
   };
 

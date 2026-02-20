@@ -4,6 +4,7 @@ import { getPosts, getUniversityBySlug } from '@/lib/api';
 import UniversityTabs from '@/components/post/UniversityTabs';
 import CategoryGrid from '@/components/post/CategoryGrid';
 import PostCard from '@/components/post/PostCard';
+import EmptyState from '@/components/ui/EmptyState';
 import { Separator } from '@/components/ui/separator';
 
 interface Props {
@@ -51,9 +52,7 @@ export default async function UniversityPage({ params }: Props) {
           {posts.length > 0 ? (
             posts.map(post => <PostCard key={post.id} post={post} />)
           ) : (
-            <div className="px-4 py-16 text-center text-muted-foreground">
-              아직 게시글이 없습니다. 첫 번째 글을 작성해보세요!
-            </div>
+            <EmptyState message="아직 게시글이 없습니다." actionLabel="첫 번째 글 작성하기" actionHref="/write" />
           )}
         </div>
       </section>

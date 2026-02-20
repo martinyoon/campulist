@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { getPosts } from '@/lib/api';
 import PostCard from '@/components/post/PostCard';
+import EmptyState from '@/components/ui/EmptyState';
 import { Badge } from '@/components/ui/badge';
 
 interface Props {
@@ -75,10 +76,7 @@ export default async function SearchPage({ searchParams }: Props) {
           posts.length > 0 ? (
             posts.map(post => <PostCard key={post.id} post={post} />)
           ) : (
-            <div className="px-4 py-16 text-center text-muted-foreground">
-              <p className="text-lg font-medium">&ldquo;{query}&rdquo;에 대한 검색 결과가 없습니다.</p>
-              <p className="mt-2 text-sm">다른 검색어로 시도해보세요.</p>
-            </div>
+            <EmptyState message={`\u201C${query}\u201D에 대한 검색 결과가 없습니다.`} sub="다른 검색어로 시도해보세요." />
           )
         ) : (
           <div className="px-4 py-16 text-center text-muted-foreground">

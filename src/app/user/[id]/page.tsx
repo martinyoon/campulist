@@ -6,6 +6,7 @@ import { formatRelativeTime } from '@/lib/format';
 import PostCard from '@/components/post/PostCard';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import EmptyState from '@/components/ui/EmptyState';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -102,9 +103,7 @@ export default async function UserProfilePage({ params }: Props) {
         {posts.length > 0 ? (
           posts.map(post => <PostCard key={post.id} post={post} />)
         ) : (
-          <div className="px-4 py-16 text-center text-muted-foreground">
-            등록된 게시글이 없습니다.
-          </div>
+          <EmptyState message="등록된 게시글이 없습니다." />
         )}
       </section>
     </div>
