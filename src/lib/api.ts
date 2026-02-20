@@ -3,11 +3,11 @@
 // Phase B에서 이 파일만 Supabase 버전으로 교체하면 전환 완료
 // ============================================================
 
-import type { PostListItem, PostDetail, PostFilters } from './types';
+import type { PostListItem, PostDetail, PostFilters, User } from './types';
 import { mockPosts, toPostListItem, getPostImages, getPostTags } from '@/data/posts';
 import { universities } from '@/data/universities';
 import { categories } from '@/data/categories';
-import { getUserSummary } from '@/data/users';
+import { getUserSummary, mockUsers } from '@/data/users';
 
 export async function getPosts(filters?: PostFilters): Promise<PostListItem[]> {
   let posts = [...mockPosts].filter(p => p.status === 'active');
@@ -117,4 +117,15 @@ export async function getUniversityBySlug(slug: string) {
 
 export async function getAllUniversities() {
   return universities;
+}
+
+export async function getUserById(userId: string): Promise<User | null> {
+  return mockUsers.find(u => u.id === userId) || null;
+}
+
+export async function getUserPosts(userId: string): Promise<PostListItem[]> {
+  const posts = mockPosts
+    .filter(p => p.authorId === userId)
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  return posts.map(toPostListItem);
 }

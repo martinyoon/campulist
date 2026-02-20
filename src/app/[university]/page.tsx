@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getPosts, getUniversityBySlug } from '@/lib/api';
 import UniversityTabs from '@/components/post/UniversityTabs';
@@ -7,6 +8,16 @@ import { Separator } from '@/components/ui/separator';
 
 interface Props {
   params: Promise<{ university: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { university: slug } = await params;
+  const university = await getUniversityBySlug(slug);
+  if (!university) return { title: '캠푸리스트' };
+  return {
+    title: `${university.name} | 캠푸리스트`,
+    description: `${university.name} 캠퍼스 중고거래, 주거, 일자리, 커뮤니티 - 캠푸리스트`,
+  };
 }
 
 export default async function UniversityPage({ params }: Props) {

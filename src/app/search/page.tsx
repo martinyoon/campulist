@@ -1,9 +1,20 @@
+import type { Metadata } from 'next';
 import { getPosts } from '@/lib/api';
 import PostCard from '@/components/post/PostCard';
 import { Badge } from '@/components/ui/badge';
 
 interface Props {
   searchParams: Promise<{ q?: string; sort?: string }>;
+}
+
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const { q } = await searchParams;
+  const query = q?.trim();
+  if (!query) return { title: '검색 | 캠푸리스트' };
+  return {
+    title: `"${query}" 검색 결과 | 캠푸리스트`,
+    description: `캠푸리스트에서 "${query}" 검색 결과`,
+  };
 }
 
 export default async function SearchPage({ searchParams }: Props) {

@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getPostDetail, getRelatedPosts } from '@/lib/api';
@@ -14,6 +15,22 @@ interface Props {
   params: Promise<{ id: string }>;
 }
 
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  const post = await getPostDetail(id);
+  if (!post) return { title: '게시글을 찾을 수 없습니다 | 캠푸리스트' };
+  const price = post.price !== null ? formatPrice(post.price) : '';
+  return {
+    title: `${post.title}${price ? ` - ${price}` : ''} | ${post.university.name} | 캠푸리스트`,
+    description: post.body.slice(0, 160),
+    openGraph: {
+      title: post.title,
+      description: post.body.slice(0, 160),
+      images: post.images.length > 0 ? [post.images[0]] : undefined,
+    },
+  };
+}
+
 export default async function PostDetailPage({ params }: Props) {
   const { id } = await params;
   const [post, relatedPosts] = await Promise.all([
@@ -28,7 +45,7 @@ export default async function PostDetailPage({ params }: Props) {
       <ImageGallery images={post.images} title={post.title} />
 
       {/* 작성자 정보 */}
-      <div className="flex items-center gap-3 border-b border-border px-4 py-4">
+      <Link href={`/user/${post.authorId}`} className="flex items-center gap-3 border-b border-border px-4 py-4 transition-colors hover:bg-muted/50">
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-lg font-medium">
           {post.author.nickname.charAt(0)}
         </div>
@@ -46,7 +63,7 @@ export default async function PostDetailPage({ params }: Props) {
             매너온도 {post.author.mannerTemp}° · 거래 {post.author.tradeCount}회
           </p>
         </div>
-      </div>
+      </Link>
 
       {/* 게시글 내용 */}
       <div className="px-4 py-4">

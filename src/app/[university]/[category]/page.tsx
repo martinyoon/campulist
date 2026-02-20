@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getPosts, getUniversityBySlug } from '@/lib/api';
@@ -9,6 +10,17 @@ import { Badge } from '@/components/ui/badge';
 interface Props {
   params: Promise<{ university: string; category: string }>;
   searchParams: Promise<{ minor?: string; sort?: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { university: uniSlug, category: catSlug } = await params;
+  const university = await getUniversityBySlug(uniSlug);
+  const category = getCategoryBySlug(catSlug);
+  if (!university || !category) return { title: '캠푸리스트' };
+  return {
+    title: `${category.icon} ${category.name} | ${university.name} | 캠푸리스트`,
+    description: `${university.name} ${category.name} 게시글 목록 - 캠푸리스트`,
+  };
 }
 
 export default async function CategoryPage({ params, searchParams }: Props) {
