@@ -15,6 +15,7 @@ export default function ReportButton({ postId }: ReportButtonProps) {
       <button
         onClick={() => setOpen(true)}
         className="text-xs text-muted-foreground hover:text-destructive"
+        aria-label="게시글 신고하기"
       >
         신고
       </button>

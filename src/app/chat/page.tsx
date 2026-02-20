@@ -79,6 +79,9 @@ export default function ChatPage() {
           <svg className="mx-auto mb-4" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
           <p className="text-lg font-medium">채팅이 없습니다</p>
           <p className="mt-2 text-sm">관심 있는 게시글에서 채팅을 시작해보세요.</p>
+          <Link href="/" className="mt-4 inline-block rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+            게시글 둘러보기
+          </Link>
         </div>
       )}
     </div>

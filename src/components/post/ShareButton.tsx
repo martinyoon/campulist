@@ -16,7 +16,7 @@ export default function ShareButton() {
   };
 
   return (
-    <Button variant="outline" size="icon" className="shrink-0" onClick={handleShare}>
+    <Button variant="outline" size="icon" className="shrink-0" onClick={handleShare} aria-label="링크 공유하기">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <circle cx="18" cy="5" r="3" />
         <circle cx="6" cy="12" r="3" />

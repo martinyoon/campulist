@@ -26,13 +26,13 @@ function getReportedPostIds(): string[] {
   }
 }
 
-function saveReport(postId: string, reason: ReportReason, description: string): void {
+// Phase B: reason, description을 Supabase에 저장
+function saveReport(postId: string, _reason: ReportReason, _description: string): void {
   const ids = getReportedPostIds();
   if (!ids.includes(postId)) {
     ids.push(postId);
     localStorage.setItem(STORAGE_KEYS.REPORTS, JSON.stringify(ids));
   }
-  console.log('신고 접수:', { postId, reason, description });
 }
 
 export default function ReportDialog({ postId, onClose }: ReportDialogProps) {
@@ -79,7 +79,7 @@ export default function ReportDialog({ postId, onClose }: ReportDialogProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
-      <div className="mx-4 w-full max-w-sm rounded-xl bg-background p-6" onClick={e => e.stopPropagation()}>
+      <div className="mx-4 w-full max-w-sm rounded-xl bg-background p-6" role="dialog" aria-label="게시글 신고" onClick={e => e.stopPropagation()}>
         <h3 className="text-lg font-bold">게시글 신고</h3>
         <p className="mt-1 text-sm text-muted-foreground">신고 사유를 선택해주세요</p>
 

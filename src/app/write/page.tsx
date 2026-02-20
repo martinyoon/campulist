@@ -296,13 +296,16 @@ export default function WritePage() {
           {errors.body && <p className="mt-1 text-xs text-red-500">{errors.body}</p>}
         </div>
 
-        {/* 이미지 (시제품: UI만) */}
+        {/* 이미지 (Phase B: Supabase Storage 연동 후 활성화) */}
         <div>
           <label className="mb-1.5 block text-sm font-medium">사진</label>
-          <button className="flex h-20 w-20 flex-col items-center justify-center rounded-lg border-2 border-dashed border-border text-muted-foreground hover:border-blue-400 hover:text-blue-400">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="m21 15-5-5L5 21" /></svg>
-            <span className="mt-1 text-[10px]">0/10</span>
-          </button>
+          <div className="flex items-center gap-3">
+            <div className="flex h-20 w-20 flex-col items-center justify-center rounded-lg border-2 border-dashed border-border text-muted-foreground/50">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="m21 15-5-5L5 21" /></svg>
+              <span className="mt-1 text-[10px]">0/10</span>
+            </div>
+            <p className="text-xs text-muted-foreground">사진 업로드는 정식 버전에서 지원됩니다.</p>
+          </div>
         </div>
 
         {/* 태그 */}

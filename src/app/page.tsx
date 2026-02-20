@@ -6,6 +6,7 @@ import PostCard from '@/components/post/PostCard';
 import { Separator } from '@/components/ui/separator';
 import { mockPosts } from '@/data/posts';
 import { categories } from '@/data/categories';
+import { universities } from '@/data/universities';
 
 export default async function HomePage() {
   const [latestPosts, popularPosts] = await Promise.all([
@@ -15,6 +16,8 @@ export default async function HomePage() {
 
   // 캠퍼스 비즈니스 게시글 (카테고리 6: 캠퍼스 비즈니스)
   const bizPosts = mockPosts.filter(p => p.categoryMajorId === 6 && p.status === 'active').slice(0, 3);
+  const firstBizUni = bizPosts[0] ? universities.find(u => u.id === bizPosts[0].universityId) : null;
+  const bizMoreHref = `/${firstBizUni?.slug || 'snu'}/business`;
 
   return (
     <div>
@@ -48,7 +51,7 @@ export default async function HomePage() {
           <section>
             <div className="flex items-center justify-between px-4 py-3">
               <h2 className="text-lg font-bold">🏪 캠퍼스 비즈니스</h2>
-              <Link href="/snu/business" className="text-sm text-blue-500 hover:text-blue-600">더보기</Link>
+              <Link href={bizMoreHref} className="text-sm text-blue-500 hover:text-blue-600">더보기</Link>
             </div>
             <div className="flex gap-3 overflow-x-auto px-4 pb-3">
               {bizPosts.map(bp => {
