@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { universities } from '@/data/universities';
 import { majorCategories, getMinorCategories } from '@/data/categories';
 import { STORAGE_KEYS } from '@/lib/constants';
+import { useToast } from '@/components/ui/Toast';
 
 interface WriteDraft {
   title: string;
@@ -24,6 +25,7 @@ interface WriteDraft {
 
 export default function WritePage() {
   const router = useRouter();
+  const { toast } = useToast();
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [price, setPrice] = useState('');
@@ -109,7 +111,7 @@ export default function WritePage() {
     if (Object.keys(errs).length > 0) return;
     // Phase A: 제출 후 임시저장 삭제
     clearDraft();
-    alert('시제품 모드: 게시글이 작성되었습니다! (Mock)');
+    toast('게시글이 등록되었습니다!');
     router.push('/');
   };
 

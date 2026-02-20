@@ -4,6 +4,7 @@ import "./globals.css";
 import ThemeProvider from "@/components/ThemeProvider";
 import Header from "@/components/layout/Header";
 import BottomNav from "@/components/layout/BottomNav";
+import { ToastProvider } from "@/components/ui/Toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,11 +25,13 @@ export default function RootLayout({
     <html lang="ko" suppressHydrationWarning>
       <body className={`${geistSans.variable} font-sans antialiased bg-background text-foreground`}>
         <ThemeProvider>
-          <Header />
-          <main className="mx-auto min-h-screen max-w-5xl pb-16 md:pb-0">
-            {children}
-          </main>
-          <BottomNav />
+          <ToastProvider>
+            <Header />
+            <main className="mx-auto min-h-screen max-w-5xl pb-16 md:pb-0">
+              {children}
+            </main>
+            <BottomNav />
+          </ToastProvider>
         </ThemeProvider>
       </body>
     </html>

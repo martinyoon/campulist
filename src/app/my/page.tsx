@@ -9,6 +9,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import { mockPosts, toPostListItem } from '@/data/posts';
 import { formatPrice, formatRelativeTime } from '@/lib/format';
 import { STORAGE_KEYS } from '@/lib/constants';
+import { useToast } from '@/components/ui/Toast';
 
 type Tab = 'selling' | 'likes' | 'reviews';
 
@@ -21,6 +22,7 @@ function getLikedPostIds(): string[] {
 }
 
 export default function MyPage() {
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<Tab>('selling');
   const [likedIds, setLikedIds] = useState<string[]>([]);
 
@@ -243,7 +245,7 @@ export default function MyPage() {
         <Button
           variant="ghost"
           className="w-full text-muted-foreground hover:text-destructive"
-          onClick={() => alert('시제품 모드: 로그아웃 (Mock)')}
+          onClick={() => toast('로그아웃 되었습니다')}
         >
           로그아웃
         </Button>

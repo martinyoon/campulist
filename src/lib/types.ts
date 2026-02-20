@@ -85,6 +85,7 @@ export interface PostListItem {
   priceNegotiable: boolean;
   status: PostStatus;
   thumbnail: string | null;
+  bodySnippet: string;
   viewCount: number;
   likeCount: number;
   createdAt: string;

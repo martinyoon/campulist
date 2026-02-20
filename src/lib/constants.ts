@@ -6,6 +6,7 @@
 export const STORAGE_KEYS = {
   LIKED_POSTS: 'campulist_liked_posts',
   WRITE_DRAFT: 'campulist_write_draft',
+  RECENT_SEARCHES: 'campulist_recent_searches',
 } as const;
 
 export const LIMITS = {

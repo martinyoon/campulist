@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { getPosts } from '@/lib/api';
 import PostCard from '@/components/post/PostCard';
 import EmptyState from '@/components/ui/EmptyState';
+import RecentSearches from '@/components/search/RecentSearches';
 import { Badge } from '@/components/ui/badge';
 
 interface Props {
@@ -70,7 +71,8 @@ export default async function SearchPage({ searchParams }: Props) {
         </div>
       )}
 
-      {/* 검색 결과 목록 */}
+      {/* 최근 검색어 (검색어 없을 때) + 검색 결과 */}
+      <RecentSearches currentQuery={query || undefined} />
       <div>
         {query ? (
           posts.length > 0 ? (

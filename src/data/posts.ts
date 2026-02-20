@@ -134,6 +134,7 @@ export function toPostListItem(post: Post): PostListItem {
     priceNegotiable: post.priceNegotiable,
     status: post.status,
     thumbnail: images[0] || null,
+    bodySnippet: post.body.length > 50 ? post.body.slice(0, 50) + '…' : post.body,
     viewCount: post.viewCount,
     likeCount: post.likeCount,
     createdAt: post.createdAt,

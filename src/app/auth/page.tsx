@@ -5,8 +5,10 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
+import { useToast } from '@/components/ui/Toast';
 
 export default function AuthPage() {
+  const { toast } = useToast();
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -14,7 +16,7 @@ export default function AuthPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    alert(`시제품 모드: ${mode === 'login' ? '로그인' : '회원가입'} (Mock)`);
+    toast(mode === 'login' ? '로그인 되었습니다' : '회원가입이 완료되었습니다');
   };
 
   return (

@@ -27,9 +27,16 @@ export default function PostCard({ post }: PostCardProps) {
 
       {/* 정보 */}
       <div className="flex min-w-0 flex-1 flex-col">
-        <h3 className="truncate text-base font-medium text-foreground">{post.title}</h3>
-        <p className="mt-0.5 text-sm text-muted-foreground">
-          {post.university.name} · {post.categoryMinor.name}
+        <div className="flex items-center gap-1.5">
+          {post.status !== 'active' && (
+            <Badge variant="outline" className={`shrink-0 text-[10px] ${post.status === 'reserved' ? 'text-orange-500 border-orange-500/30' : 'text-green-500 border-green-500/30'}`}>
+              {post.status === 'reserved' ? '예약중' : '거래완료'}
+            </Badge>
+          )}
+          <h3 className="truncate text-base font-medium text-foreground">{post.title}</h3>
+        </div>
+        <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">
+          {post.bodySnippet}
         </p>
         <p className="mt-1 text-lg font-bold text-foreground">
           {formatPrice(post.price)}
@@ -43,15 +50,13 @@ export default function PostCard({ post }: PostCardProps) {
               인증
             </Badge>
           )}
+          <span>{post.university.name}</span>
           <span>{formatRelativeTime(post.createdAt)}</span>
           {post.likeCount > 0 && (
             <span className="flex items-center gap-0.5">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg>
               {post.likeCount}
             </span>
-          )}
-          {post.viewCount > 0 && (
-            <span>조회 {post.viewCount}</span>
           )}
         </div>
       </div>
