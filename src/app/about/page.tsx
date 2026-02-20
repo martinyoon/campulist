@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { Separator } from '@/components/ui/separator';
 
 export default function AboutPage() {
@@ -41,9 +40,9 @@ export default function AboutPage() {
       <Separator className="my-6" />
 
       <section className="space-y-3 text-sm text-muted-foreground">
-        <Link href="#" className="block hover:text-foreground">이용약관</Link>
-        <Link href="#" className="block hover:text-foreground">개인정보처리방침</Link>
-        <Link href="#" className="block hover:text-foreground">문의하기: support@campulist.com</Link>
+        <p>이용약관 <span className="text-xs">(준비중)</span></p>
+        <p>개인정보처리방침 <span className="text-xs">(준비중)</span></p>
+        <p>문의하기: support@campulist.com</p>
       </section>
 
       <p className="mt-6 text-xs text-muted-foreground">

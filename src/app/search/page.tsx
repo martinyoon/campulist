@@ -3,10 +3,11 @@ import { getPosts } from '@/lib/api';
 import PostCard from '@/components/post/PostCard';
 import EmptyState from '@/components/ui/EmptyState';
 import RecentSearches from '@/components/search/RecentSearches';
+import PriceFilter from '@/components/search/PriceFilter';
 import { Badge } from '@/components/ui/badge';
 
 interface Props {
-  searchParams: Promise<{ q?: string; sort?: string }>;
+  searchParams: Promise<{ q?: string; sort?: string; priceMin?: string; priceMax?: string }>;
 }
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
@@ -20,12 +21,14 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
 }
 
 export default async function SearchPage({ searchParams }: Props) {
-  const { q, sort } = await searchParams;
+  const { q, sort, priceMin: pMin, priceMax: pMax } = await searchParams;
   const query = q?.trim() || '';
   const sortBy = (sort as 'latest' | 'price_asc' | 'price_desc' | 'popular') || 'latest';
+  const priceMin = pMin ? Number(pMin) : undefined;
+  const priceMax = pMax ? Number(pMax) : undefined;
 
   const posts = query
-    ? await getPosts({ query, sortBy, limit: 50 })
+    ? await getPosts({ query, sortBy, priceMin, priceMax, limit: 50 })
     : [];
 
   const sortOptions = [
@@ -53,22 +56,30 @@ export default async function SearchPage({ searchParams }: Props) {
         )}
       </div>
 
-      {/* 정렬 옵션 */}
+      {/* 정렬 옵션 + 가격 필터 */}
       {query && posts.length > 0 && (
-        <div className="flex gap-2 overflow-x-auto px-4 py-3 scrollbar-hide">
-          {sortOptions.map(opt => (
-            <a key={opt.value} href={`/search?q=${encodeURIComponent(query)}&sort=${opt.value}`}>
-              <Badge
-                variant={sortBy === opt.value ? 'default' : 'outline'}
-                className={`shrink-0 cursor-pointer ${
-                  sortBy === opt.value ? 'bg-blue-600 text-white' : 'hover:bg-muted'
-                }`}
-              >
-                {opt.label}
-              </Badge>
-            </a>
-          ))}
-        </div>
+        <>
+          <div className="flex gap-2 overflow-x-auto px-4 py-3 scrollbar-hide">
+            {sortOptions.map(opt => {
+              const params = new URLSearchParams({ q: query, sort: opt.value });
+              if (priceMin !== undefined) params.set('priceMin', String(priceMin));
+              if (priceMax !== undefined) params.set('priceMax', String(priceMax));
+              return (
+                <a key={opt.value} href={`/search?${params.toString()}`}>
+                  <Badge
+                    variant={sortBy === opt.value ? 'default' : 'outline'}
+                    className={`shrink-0 cursor-pointer ${
+                      sortBy === opt.value ? 'bg-blue-600 text-white' : 'hover:bg-muted'
+                    }`}
+                  >
+                    {opt.label}
+                  </Badge>
+                </a>
+              );
+            })}
+          </div>
+          <PriceFilter query={query} sort={sortBy} currentMin={priceMin} currentMax={priceMax} />
+        </>
       )}
 
       {/* 최근 검색어 (검색어 없을 때) + 검색 결과 */}

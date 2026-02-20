@@ -11,8 +11,8 @@ const mockNotifications: Notification[] = [
   { id: 'n1', type: 'chat', title: '서연이님이 메시지를 보냈습니다', body: '맥북 프로 아직 판매 중인가요?', link: '/chat', isRead: false, createdAt: '2026-02-20T10:30:00Z' },
   { id: 'n2', type: 'like', title: '맥북 프로 M2 14인치 팝니다', body: '게시글에 좋아요가 눌렸습니다', link: '/post/p1', isRead: false, createdAt: '2026-02-20T09:15:00Z' },
   { id: 'n3', type: 'keyword', title: '키워드 알림: "아이패드"', body: '새 게시글이 등록되었습니다: 아이패드 에어 5세대 + 애플펜슬', link: '/post/p4', isRead: true, createdAt: '2026-02-19T16:00:00Z' },
-  { id: 'n4', type: 'system', title: '캠푸리스트에 오신 것을 환영합니다!', body: '대학 인증을 완료하면 더 많은 기능을 이용할 수 있습니다.', link: '/my/settings', isRead: true, createdAt: '2026-02-18T10:00:00Z' },
-  { id: 'n5', type: 'review', title: '거래 후기가 도착했습니다', body: '민수짱님이 후기를 남겼습니다: "빠른 거래 감사합니다!"', link: '/my/reviews', isRead: true, createdAt: '2026-02-17T14:00:00Z' },
+  { id: 'n4', type: 'system', title: '캠푸리스트에 오신 것을 환영합니다!', body: '대학 인증을 완료하면 더 많은 기능을 이용할 수 있습니다.', link: '/my', isRead: true, createdAt: '2026-02-18T10:00:00Z' },
+  { id: 'n5', type: 'review', title: '거래 후기가 도착했습니다', body: '민수짱님이 후기를 남겼습니다: "빠른 거래 감사합니다!"', link: '/my', isRead: true, createdAt: '2026-02-17T14:00:00Z' },
 ];
 
 const typeIcons: Record<string, string> = {
