@@ -4,6 +4,7 @@ import "./globals.css";
 import ThemeProvider from "@/components/ThemeProvider";
 import Header from "@/components/layout/Header";
 import BottomNav from "@/components/layout/BottomNav";
+import ScrollToTop from "@/components/layout/ScrollToTop";
 import { ToastProvider } from "@/components/ui/Toast";
 
 const geistSans = Geist({
@@ -31,6 +32,7 @@ export default function RootLayout({
               {children}
             </main>
             <BottomNav />
+            <ScrollToTop />
           </ToastProvider>
         </ThemeProvider>
       </body>

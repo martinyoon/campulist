@@ -10,6 +10,7 @@ import ImageGallery from '@/components/post/ImageGallery';
 import PostCard from '@/components/post/PostCard';
 import ReportButton from '@/components/post/ReportButton';
 import LikeButton from '@/components/post/LikeButton';
+import ShareButton from '@/components/post/ShareButton';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -67,13 +68,17 @@ export default async function PostDetailPage({ params }: Props) {
 
       {/* 게시글 내용 */}
       <div className="px-4 py-4">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <nav className="flex items-center gap-1.5 text-sm text-muted-foreground">
+          <Link href={`/${post.university.slug}`} className="hover:text-blue-500">
+            {post.university.name}
+          </Link>
+          <span>›</span>
           <Link href={`/${post.university.slug}/${post.categoryMajor.slug}`} className="hover:text-blue-500">
             {post.categoryMajor.icon} {post.categoryMajor.name}
           </Link>
           <span>›</span>
-          <span>{post.categoryMinor.name}</span>
-        </div>
+          <span className="text-foreground/70">{post.categoryMinor.name}</span>
+        </nav>
 
         <div className="mt-2 flex items-center gap-2">
           {post.status !== 'active' && (
@@ -101,9 +106,11 @@ export default async function PostDetailPage({ params }: Props) {
         {post.tags.length > 0 && (
           <div className="mt-4 flex flex-wrap gap-2">
             {post.tags.map(tag => (
-              <Badge key={tag} variant="outline">
-                #{tag}
-              </Badge>
+              <Link key={tag} href={`/search?q=${encodeURIComponent(tag)}`}>
+                <Badge variant="outline" className="cursor-pointer hover:bg-muted">
+                  #{tag}
+                </Badge>
+              </Link>
             ))}
           </div>
         )}
@@ -136,6 +143,7 @@ export default async function PostDetailPage({ params }: Props) {
       <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background px-4 py-3 md:static md:mt-4 md:border-t-0">
         <div className="mx-auto flex max-w-5xl items-center gap-3">
           <LikeButton postId={post.id} initialLiked={post.isLiked} />
+          <ShareButton />
           <div className="flex-1">
             <p className="text-lg font-bold">{formatPrice(post.price)}</p>
             {post.priceNegotiable && <p className="text-xs text-muted-foreground">가격 협의 가능</p>}
