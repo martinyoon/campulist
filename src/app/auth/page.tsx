@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,6 +13,10 @@ export default function AuthPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [nickname, setNickname] = useState('');
+
+  useEffect(() => {
+    document.title = mode === 'login' ? '로그인 | 캠푸리스트' : '회원가입 | 캠푸리스트';
+  }, [mode]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,8 +53,9 @@ export default function AuthPage() {
         <form onSubmit={handleSubmit} className="space-y-4">
           {mode === 'signup' && (
             <div>
-              <label className="mb-1.5 block text-sm font-medium">닉네임</label>
+              <label htmlFor="auth-nickname" className="mb-1.5 block text-sm font-medium">닉네임</label>
               <Input
+                id="auth-nickname"
                 placeholder="닉네임을 입력하세요"
                 value={nickname}
                 onChange={e => setNickname(e.target.value)}
@@ -59,10 +64,11 @@ export default function AuthPage() {
           )}
 
           <div>
-            <label className="mb-1.5 block text-sm font-medium">이메일</label>
+            <label htmlFor="auth-email" className="mb-1.5 block text-sm font-medium">이메일</label>
             <Input
+              id="auth-email"
               type="email"
-              placeholder="학교 이메일 (example@snu.ac.kr)"
+              placeholder="학교 이메일을 입력하세요"
               value={email}
               onChange={e => setEmail(e.target.value)}
             />
@@ -74,8 +80,9 @@ export default function AuthPage() {
           </div>
 
           <div>
-            <label className="mb-1.5 block text-sm font-medium">비밀번호</label>
+            <label htmlFor="auth-password" className="mb-1.5 block text-sm font-medium">비밀번호</label>
             <Input
+              id="auth-password"
               type="password"
               placeholder="비밀번호를 입력하세요"
               value={password}

@@ -86,6 +86,10 @@ export default function WritePage() {
     } catch { /* ignore parse errors */ }
   }, []);
 
+  useEffect(() => {
+    document.title = isEditMode ? '글 수정 | 캠푸리스트' : '글쓰기 | 캠푸리스트';
+  }, [isEditMode]);
+
   // 자동 임시저장 (1초 디바운스, 수정 모드에서는 비활성)
   const saveDraft = useCallback(() => {
     if (isEditMode) return;

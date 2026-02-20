@@ -11,6 +11,7 @@ export default function ChatPage() {
   const [chats, setChats] = useState<ChatRoom[]>([]);
 
   useEffect(() => {
+    document.title = '채팅 | 캠푸리스트';
     const rooms = getAllChatRooms();
     // 최신 메시지 순 정렬
     rooms.sort((a, b) => {

@@ -39,6 +39,7 @@ export default function NotificationsPage() {
   const [readIds, setReadIds] = useState<string[]>([]);
 
   useEffect(() => {
+    document.title = '알림 | 캠푸리스트';
     setReadIds(getReadIds());
   }, []);
 

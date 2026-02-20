@@ -33,6 +33,7 @@ export default function MyPage() {
   const [recentPosts, setRecentPosts] = useState<PostListItem[]>([]);
 
   useEffect(() => {
+    document.title = '마이페이지 | 캠푸리스트';
     setMyPosts(getMyPosts(CURRENT_USER_ID));
     const ids = getLikedPostIds();
     if (ids.length > 0) {

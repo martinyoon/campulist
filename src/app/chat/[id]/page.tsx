@@ -24,6 +24,7 @@ export default function ChatDetailPage() {
 
   // 메시지 로드 (mock + localStorage) + 안읽음 초기화
   useEffect(() => {
+    if (room) document.title = `${room.otherUser.nickname} 채팅 | 캠푸리스트`;
     clearChatUnread(roomId);
     const mockMessages = getChatMessages(roomId);
     try {
