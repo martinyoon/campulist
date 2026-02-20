@@ -29,7 +29,7 @@ export default function WritePage() {
   const [body, setBody] = useState('');
   const [price, setPrice] = useState('');
   const [priceNegotiable, setPriceNegotiable] = useState(false);
-  const [universityId, setUniversityId] = useState(1);
+  const [universityId, setUniversityId] = useState(universities[0]?.id ?? 1);
   const [majorId, setMajorId] = useState<number | null>(null);
   const [minorId, setMinorId] = useState<number | null>(null);
   const [tagInput, setTagInput] = useState('');

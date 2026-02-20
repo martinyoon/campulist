@@ -57,6 +57,24 @@ export const mockPosts: Post[] = [
   { id: 'p28', title: '방학 단기 임대 (2개월)', body: '교환학생 귀국으로 2~3월 단기 임대합니다. 안암동 풀옵션 원룸.', authorId: 'u7', universityId: 3, categoryMajorId: 2, categoryMinorId: 24, price: 400000, priceNegotiable: true, isPremium: false, status: 'active', locationDetail: '안암동', viewCount: 67, likeCount: 7, bumpedAt: '2026-02-19T11:00:00Z', createdAt: '2026-02-17T16:00:00Z', updatedAt: '2026-02-17T16:00:00Z' },
   { id: 'p29', title: '카페 알바 구합니다 (신촌)', body: '주말 포함 주 3회. 시급 11,000원 + 음료 무료. 바리스타 경험자 우대.', authorId: 'u8', universityId: 2, categoryMajorId: 3, categoryMinorId: 31, price: 11000, priceNegotiable: false, isPremium: false, status: 'active', locationDetail: '신촌 카페거리', viewCount: 156, likeCount: 21, bumpedAt: '2026-02-20T07:30:00Z', createdAt: '2026-02-18T09:00:00Z', updatedAt: '2026-02-18T09:00:00Z' },
   { id: 'p30', title: '웹 개발 외주 받습니다', body: 'React, Next.js 전문. 포트폴리오 사이트부터 간단한 웹앱까지. 학생 할인 적용.', authorId: 'u2', universityId: 1, categoryMajorId: 5, categoryMinorId: 55, price: null, priceNegotiable: false, isPremium: false, status: 'active', locationDetail: null, viewCount: 63, likeCount: 5, bumpedAt: '2026-02-18T13:00:00Z', createdAt: '2026-02-16T20:00:00Z', updatedAt: '2026-02-16T20:00:00Z' },
+
+  // ===== KAIST 마켓 =====
+  { id: 'p31', title: 'LG 그램 17인치 팝니다 (i7, 16GB)', body: '2025년 구매, 경량 노트북. 배터리 상태 우수. 충전기 포함. 어은동 직거래.', authorId: 'u9', universityId: 4, categoryMajorId: 1, categoryMinorId: 12, price: 980000, priceNegotiable: true, isPremium: false, status: 'active', locationDetail: 'KAIST 북문 CU 앞', viewCount: 67, likeCount: 8, bumpedAt: '2026-02-20T09:30:00Z', createdAt: '2026-02-19T15:00:00Z', updatedAt: '2026-02-19T15:00:00Z' },
+  { id: 'p32', title: '알고리즘 교재 CLRS (Introduction to Algorithms)', body: '3판 영문판. 상태 양호, 연필 밑줄 약간. 정가 50,000원 → 20,000원.', authorId: 'u10', universityId: 4, categoryMajorId: 1, categoryMinorId: 11, price: 20000, priceNegotiable: false, isPremium: false, status: 'active', locationDetail: 'KAIST 도서관 앞', viewCount: 45, likeCount: 5, bumpedAt: '2026-02-19T18:00:00Z', createdAt: '2026-02-19T11:00:00Z', updatedAt: '2026-02-19T11:00:00Z' },
+  { id: 'p33', title: '자취 냉장고 무료나눔 (삼성 160L)', body: '졸업 정리합니다. 직접 가져가실 분만. 어은동 위치. 상태 양호.', authorId: 'u9', universityId: 4, categoryMajorId: 1, categoryMinorId: 16, price: 0, priceNegotiable: false, isPremium: false, status: 'active', locationDetail: '어은동 자취방', viewCount: 189, likeCount: 22, bumpedAt: '2026-02-20T08:00:00Z', createdAt: '2026-02-18T09:00:00Z', updatedAt: '2026-02-18T09:00:00Z' },
+
+  // ===== KAIST 주거 =====
+  { id: 'p34', title: '어은동 원룸 양도 (보증금 200/월 30)', body: 'KAIST 북문 도보 3분. 풀옵션. 3월 입주 가능. 조용한 동네.', authorId: 'u10', universityId: 4, categoryMajorId: 2, categoryMinorId: 21, price: 300000, priceNegotiable: true, isPremium: false, status: 'active', locationDetail: '어은동', viewCount: 145, likeCount: 13, bumpedAt: '2026-02-20T10:00:00Z', createdAt: '2026-02-17T14:00:00Z', updatedAt: '2026-02-17T14:00:00Z' },
+
+  // ===== KAIST 일자리 =====
+  { id: 'p35', title: 'ML 연구실 인턴 모집 (학부생 환영)', body: 'KAIST AI 연구실에서 학부 인턴 모집. Python, PyTorch 기본 가능자. 월 60만원. 주 20시간.', authorId: 'u9', universityId: 4, categoryMajorId: 3, categoryMinorId: 34, price: 600000, priceNegotiable: false, isPremium: false, status: 'active', locationDetail: 'KAIST E3-1동 연구실', viewCount: 234, likeCount: 31, bumpedAt: '2026-02-20T07:00:00Z', createdAt: '2026-02-16T10:00:00Z', updatedAt: '2026-02-16T10:00:00Z' },
+  { id: 'p36', title: '코딩 과외 (Python/C++ 기초)', body: '전산학부 재학생입니다. 프로그래밍 입문자 대상. 주 1~2회, 시급 35,000원.', authorId: 'u9', universityId: 4, categoryMajorId: 3, categoryMinorId: 32, price: 35000, priceNegotiable: true, isPremium: false, status: 'active', locationDetail: '유성구 카페', viewCount: 52, likeCount: 4, bumpedAt: '2026-02-19T14:00:00Z', createdAt: '2026-02-18T16:00:00Z', updatedAt: '2026-02-18T16:00:00Z' },
+
+  // ===== KAIST 커뮤니티 =====
+  { id: 'p37', title: 'ICPC 스터디 모집 (알고리즘 대회)', body: 'ACM-ICPC 대비 알고리즘 스터디. 주 2회 모여서 문제풀이. Codeforces 1600+ 수준.', authorId: 'u9', universityId: 4, categoryMajorId: 4, categoryMinorId: 41, price: null, priceNegotiable: false, isPremium: false, status: 'active', locationDetail: 'KAIST 팩토리', viewCount: 78, likeCount: 12, bumpedAt: '2026-02-20T06:00:00Z', createdAt: '2026-02-19T10:00:00Z', updatedAt: '2026-02-19T10:00:00Z' },
+
+  // ===== KAIST 캠퍼스 비즈니스 =====
+  { id: 'p38', title: '[학생할인] 대전 맛집왕 추천 맛집 10% 할인', body: '대전 유성구 맛집 10곳 제휴! 학생증 제시 시 10% 할인. 성심당, 궁중해장국 등.', authorId: 'u11', universityId: 4, categoryMajorId: 6, categoryMinorId: 62, price: null, priceNegotiable: false, isPremium: false, status: 'active', locationDetail: '대전 유성구 일대', viewCount: 345, likeCount: 56, bumpedAt: '2026-02-20T11:00:00Z', createdAt: '2026-02-14T08:00:00Z', updatedAt: '2026-02-14T08:00:00Z' },
 ];
 
 const postImages: Record<string, string[]> = {
@@ -72,6 +90,10 @@ const postImages: Record<string, string[]> = {
   p19: ['https://picsum.photos/seed/buds1/600/400'],
   p25: ['https://picsum.photos/seed/truck1/600/400'],
   p28: ['https://picsum.photos/seed/shortroom1/600/400'],
+  p31: ['https://picsum.photos/seed/lggram1/600/400', 'https://picsum.photos/seed/lggram2/600/400'],
+  p33: ['https://picsum.photos/seed/fridge1/600/400'],
+  p34: ['https://picsum.photos/seed/eoeun1/600/400', 'https://picsum.photos/seed/eoeun2/600/400'],
+  p38: ['https://picsum.photos/seed/djfood1/600/400'],
 };
 
 const postTags: Record<string, string[]> = {
@@ -84,6 +106,11 @@ const postTags: Record<string, string[]> = {
   p13: ['닌텐도', '스위치', '게임'],
   p17: ['학생할인', '분식', '맛집'],
   p27: ['해커톤', 'React', '프론트엔드'],
+  p31: ['LG그램', '노트북', '경량'],
+  p32: ['알고리즘', 'CLRS', '교재', '전산'],
+  p35: ['ML', 'AI', '인턴', '연구실'],
+  p37: ['ICPC', '알고리즘', '스터디', '대회'],
+  p38: ['대전맛집', '학생할인', '성심당'],
 };
 
 export function getPostImages(postId: string): string[] {
