@@ -13,6 +13,7 @@ import LikeButton from '@/components/post/LikeButton';
 import ShareButton from '@/components/post/ShareButton';
 import PostStatusControl from '@/components/post/PostStatusControl';
 import PostBottomAction from '@/components/post/PostBottomAction';
+import ViewCountTracker from '@/components/post/ViewCountTracker';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -93,7 +94,7 @@ export default async function PostDetailPage({ params }: Props) {
 
         <div className="mt-1 flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            {formatRelativeTime(post.createdAt)} · 조회 {post.viewCount} · 찜 {post.likeCount}
+            {formatRelativeTime(post.createdAt)} · 조회 <ViewCountTracker postId={post.id} initialCount={post.viewCount} /> · 찜 {post.likeCount}
           </p>
           <ReportButton postId={post.id} />
         </div>

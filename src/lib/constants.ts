@@ -11,6 +11,8 @@ export const STORAGE_KEYS = {
   USER_POSTS: 'campulist_user_posts',
   POST_OVERRIDES: 'campulist_post_overrides',
   CHAT_ROOMS: 'campulist_chat_rooms',
+  RECENT_VIEWED: 'campulist_recent_viewed',
+  NOTIFICATION_READ: 'campulist_notification_read',
 } as const;
 
 export const LIMITS = {

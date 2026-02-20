@@ -336,3 +336,47 @@ export function createChatRoom(input: {
 
   return room;
 }
+
+// 조회수 증가 (세션당 1회만)
+export function incrementViewCount(postId: string): number {
+  if (typeof window === 'undefined') return 0;
+  // sessionStorage로 중복 방지
+  const sessionKey = `viewed_${postId}`;
+  const post = getAllPosts().find(p => p.id === postId);
+  if (!post) return 0;
+  if (sessionStorage.getItem(sessionKey)) return post.viewCount;
+  sessionStorage.setItem(sessionKey, '1');
+
+  const newCount = post.viewCount + 1;
+  const overrides = getPostOverrides();
+  overrides[postId] = { ...overrides[postId], viewCount: newCount };
+  savePostOverrides(overrides);
+  return newCount;
+}
+
+// 최근 본 게시글
+export function addRecentViewed(postId: string): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const saved = localStorage.getItem(STORAGE_KEYS.RECENT_VIEWED);
+    let recent: string[] = saved ? JSON.parse(saved) : [];
+    recent = recent.filter(id => id !== postId);
+    recent.unshift(postId);
+    if (recent.length > 20) recent = recent.slice(0, 20);
+    localStorage.setItem(STORAGE_KEYS.RECENT_VIEWED, JSON.stringify(recent));
+  } catch { /* ignore */ }
+}
+
+export function getRecentViewedPosts(): PostListItem[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const saved = localStorage.getItem(STORAGE_KEYS.RECENT_VIEWED);
+    const ids: string[] = saved ? JSON.parse(saved) : [];
+    if (ids.length === 0) return [];
+    const posts = getAllPosts().filter(p => ids.includes(p.id) && p.status !== 'hidden');
+    return ids
+      .map(id => posts.find(p => p.id === id))
+      .filter((p): p is Post => !!p)
+      .map(toPostListItem);
+  } catch { return []; }
+}

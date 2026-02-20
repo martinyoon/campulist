@@ -6,13 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import EmptyState from '@/components/ui/EmptyState';
-import { getMyPosts, getPostsByIds } from '@/lib/api';
+import { getMyPosts, getPostsByIds, getRecentViewedPosts } from '@/lib/api';
 import { formatPrice, formatRelativeTime } from '@/lib/format';
 import type { PostListItem } from '@/lib/types';
 import { STORAGE_KEYS } from '@/lib/constants';
 import { useToast } from '@/components/ui/Toast';
 
-type Tab = 'selling' | 'likes' | 'reviews';
+type Tab = 'selling' | 'likes' | 'recent' | 'reviews';
 
 function getLikedPostIds(): string[] {
   try {
@@ -27,6 +27,7 @@ export default function MyPage() {
   const [activeTab, setActiveTab] = useState<Tab>('selling');
   const [myPosts, setMyPosts] = useState<PostListItem[]>([]);
   const [likedPosts, setLikedPosts] = useState<PostListItem[]>([]);
+  const [recentPosts, setRecentPosts] = useState<PostListItem[]>([]);
 
   useEffect(() => {
     setMyPosts(getMyPosts('u1'));
@@ -34,6 +35,7 @@ export default function MyPage() {
     if (ids.length > 0) {
       setLikedPosts(getPostsByIds(ids));
     }
+    setRecentPosts(getRecentViewedPosts());
   }, []);
 
   // Mock 현재 사용자 (u1 서연이)
@@ -58,6 +60,7 @@ export default function MyPage() {
   const tabs: { key: Tab; label: string; count: number }[] = [
     { key: 'selling', label: '내 게시글', count: myPosts.length },
     { key: 'likes', label: '찜한 목록', count: likedPosts.length },
+    { key: 'recent', label: '최근 본', count: recentPosts.length },
     { key: 'reviews', label: '받은 후기', count: mockReviews.length },
   ];
 
@@ -182,6 +185,34 @@ export default function MyPage() {
             ))
           ) : (
             <EmptyState message="찜한 게시글이 없습니다." sub="게시글의 하트 버튼을 눌러 찜해보세요." />
+          )
+        )}
+
+        {/* 최근 본 게시글 */}
+        {activeTab === 'recent' && (
+          recentPosts.length > 0 ? (
+            recentPosts.map(post => (
+              <Link key={post.id} href={`/post/${post.id}`} className="flex gap-3 border-b border-border px-4 py-3 transition-colors hover:bg-muted/50">
+                {post.thumbnail ? (
+                  <img src={post.thumbnail} alt="" className="h-20 w-20 shrink-0 rounded-lg object-cover" />
+                ) : (
+                  <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="m21 15-5-5L5 21" /></svg>
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="truncate text-sm font-medium">{post.title}</p>
+                  <p className="mt-0.5 text-sm font-bold">
+                    {post.price !== null ? formatPrice(post.price) : '가격 미정'}
+                  </p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    {post.university.name} · {formatRelativeTime(post.createdAt)}
+                  </p>
+                </div>
+              </Link>
+            ))
+          ) : (
+            <EmptyState message="최근 본 게시글이 없습니다." sub="게시글을 둘러보면 여기에 표시됩니다." />
           )
         )}
 

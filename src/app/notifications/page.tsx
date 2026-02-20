@@ -1,6 +1,10 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Separator } from '@/components/ui/separator';
 import { formatRelativeTime } from '@/lib/format';
+import { STORAGE_KEYS } from '@/lib/constants';
 import type { Notification } from '@/lib/types';
 
 const mockNotifications: Notification[] = [
@@ -19,16 +23,58 @@ const typeIcons: Record<string, string> = {
   system: '📢',
 };
 
+function getReadIds(): string[] {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.NOTIFICATION_READ) || '[]');
+  } catch { return []; }
+}
+
+function saveReadIds(ids: string[]): void {
+  try {
+    localStorage.setItem(STORAGE_KEYS.NOTIFICATION_READ, JSON.stringify(ids));
+  } catch { /* ignore */ }
+}
+
 export default function NotificationsPage() {
-  const unreadCount = mockNotifications.filter(n => !n.isRead).length;
+  const [readIds, setReadIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    setReadIds(getReadIds());
+  }, []);
+
+  const isRead = (notif: Notification) => notif.isRead || readIds.includes(notif.id);
+  const unreadCount = mockNotifications.filter(n => !isRead(n)).length;
+
+  const markAsRead = (id: string) => {
+    if (readIds.includes(id)) return;
+    const next = [...readIds, id];
+    setReadIds(next);
+    saveReadIds(next);
+  };
+
+  const markAllAsRead = () => {
+    const allIds = mockNotifications.map(n => n.id);
+    setReadIds(allIds);
+    saveReadIds(allIds);
+  };
 
   return (
     <div>
       <div className="flex items-center justify-between px-4 py-3">
         <h1 className="text-xl font-bold">알림</h1>
-        {unreadCount > 0 && (
-          <span className="text-sm text-blue-500">{unreadCount}개 읽지 않음</span>
-        )}
+        <div className="flex items-center gap-3">
+          {unreadCount > 0 && (
+            <>
+              <span className="text-sm text-blue-500">{unreadCount}개 읽지 않음</span>
+              <button
+                onClick={markAllAsRead}
+                className="text-sm text-muted-foreground hover:text-foreground"
+              >
+                전체 읽음
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       <Separator />
@@ -40,31 +86,35 @@ export default function NotificationsPage() {
         </div>
       ) : (
         <div>
-          {mockNotifications.map(notif => (
-            <Link
-              key={notif.id}
-              href={notif.link || '#'}
-              className={`flex gap-3 px-4 py-3.5 transition-colors hover:bg-muted ${
-                !notif.isRead ? 'bg-blue-500/5' : ''
-              }`}
-            >
-              <span className="mt-0.5 text-lg">{typeIcons[notif.type] || '📌'}</span>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-start justify-between gap-2">
-                  <p className={`text-sm ${!notif.isRead ? 'font-semibold' : 'font-medium'}`}>
-                    {notif.title}
-                  </p>
-                  {!notif.isRead && (
-                    <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-blue-500" />
+          {mockNotifications.map(notif => {
+            const read = isRead(notif);
+            return (
+              <Link
+                key={notif.id}
+                href={notif.link || '#'}
+                onClick={() => markAsRead(notif.id)}
+                className={`flex gap-3 px-4 py-3.5 transition-colors hover:bg-muted ${
+                  !read ? 'bg-blue-500/5' : ''
+                }`}
+              >
+                <span className="mt-0.5 text-lg">{typeIcons[notif.type] || '📌'}</span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-2">
+                    <p className={`text-sm ${!read ? 'font-semibold' : 'font-medium'}`}>
+                      {notif.title}
+                    </p>
+                    {!read && (
+                      <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-blue-500" />
+                    )}
+                  </div>
+                  {notif.body && (
+                    <p className="mt-0.5 truncate text-sm text-muted-foreground">{notif.body}</p>
                   )}
+                  <p className="mt-1 text-xs text-muted-foreground">{formatRelativeTime(notif.createdAt)}</p>
                 </div>
-                {notif.body && (
-                  <p className="mt-0.5 truncate text-sm text-muted-foreground">{notif.body}</p>
-                )}
-                <p className="mt-1 text-xs text-muted-foreground">{formatRelativeTime(notif.createdAt)}</p>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>
