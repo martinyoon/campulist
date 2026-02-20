@@ -1,0 +1,35 @@
+'use client';
+
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { universities } from '@/data/universities';
+
+export default function UniversityTabs() {
+  const pathname = usePathname();
+
+  const currentSlug = universities.find(u => pathname.startsWith(`/${u.slug}`))?.slug;
+
+  return (
+    <div className="flex gap-1 overflow-x-auto border-b border-border px-4 scrollbar-hide">
+      <Link
+        href="/"
+        className={`shrink-0 border-b-2 px-3 py-2.5 text-sm font-medium transition-colors ${
+          !currentSlug ? 'border-blue-500 text-blue-500' : 'border-transparent text-muted-foreground hover:text-foreground'
+        }`}
+      >
+        전체
+      </Link>
+      {universities.map(uni => (
+        <Link
+          key={uni.slug}
+          href={`/${uni.slug}`}
+          className={`shrink-0 border-b-2 px-3 py-2.5 text-sm font-medium transition-colors ${
+            currentSlug === uni.slug ? 'border-blue-500 text-blue-500' : 'border-transparent text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          {uni.name.replace('대학교', '대')}
+        </Link>
+      ))}
+    </div>
+  );
+}
