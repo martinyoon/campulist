@@ -1,46 +1,10 @@
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
+import { mockChatRooms } from '@/data/chats';
+import { formatRelativeTime } from '@/lib/format';
 
 export default function ChatPage() {
-  // Phase A: Mock 채팅 데이터
-  const mockChats = [
-    {
-      id: 'chat-1',
-      postTitle: '맥북 에어 M3 팝니다',
-      postThumbnail: 'https://picsum.photos/seed/post1/100/100',
-      otherUser: { nickname: '연세맨', avatar: '연' },
-      lastMessage: '혹시 가격 네고 가능할까요?',
-      lastMessageAt: '5분 전',
-      unreadCount: 2,
-    },
-    {
-      id: 'chat-2',
-      postTitle: '경영학원론 교재 판매',
-      postThumbnail: 'https://picsum.photos/seed/post3/100/100',
-      otherUser: { nickname: '고대사자', avatar: '고' },
-      lastMessage: '내일 정문에서 거래 가능합니다!',
-      lastMessageAt: '1시간 전',
-      unreadCount: 0,
-    },
-    {
-      id: 'chat-3',
-      postTitle: '원룸 양도합니다 (관악구)',
-      postThumbnail: 'https://picsum.photos/seed/post5/100/100',
-      otherUser: { nickname: '서울학생', avatar: '서' },
-      lastMessage: '실사 가능한 시간이 언제일까요?',
-      lastMessageAt: '3시간 전',
-      unreadCount: 0,
-    },
-    {
-      id: 'chat-4',
-      postTitle: '통기타 레슨 해드립니다',
-      postThumbnail: 'https://picsum.photos/seed/post8/100/100',
-      otherUser: { nickname: '음악인', avatar: '음' },
-      lastMessage: '수업 시간 조율 부탁드려요',
-      lastMessageAt: '어제',
-      unreadCount: 1,
-    },
-  ];
+  const chats = mockChatRooms;
 
   return (
     <div>
@@ -50,9 +14,9 @@ export default function ChatPage() {
       </div>
 
       {/* 채팅 목록 */}
-      {mockChats.length > 0 ? (
+      {chats.length > 0 ? (
         <div>
-          {mockChats.map(chat => (
+          {chats.map(chat => (
             <Link
               key={chat.id}
               href={`/chat/${chat.id}`}
@@ -60,14 +24,16 @@ export default function ChatPage() {
             >
               {/* 상대방 아바타 */}
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-muted text-lg font-medium">
-                {chat.otherUser.avatar}
+                {chat.otherUser.nickname.charAt(0)}
               </div>
 
               {/* 채팅 내용 */}
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <span className="font-medium">{chat.otherUser.nickname}</span>
-                  <span className="text-xs text-muted-foreground">{chat.lastMessageAt}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {chat.lastMessageAt ? formatRelativeTime(chat.lastMessageAt) : ''}
+                  </span>
                 </div>
                 <p className="truncate text-sm text-muted-foreground">{chat.lastMessage}</p>
                 <p className="mt-0.5 truncate text-xs text-muted-foreground/70">{chat.postTitle}</p>
@@ -75,11 +41,13 @@ export default function ChatPage() {
 
               {/* 상품 썸네일 + 읽지 않은 수 */}
               <div className="flex shrink-0 flex-col items-end gap-1">
-                <img
-                  src={chat.postThumbnail}
-                  alt={chat.postTitle}
-                  className="h-10 w-10 rounded-md object-cover"
-                />
+                {chat.postThumbnail && (
+                  <img
+                    src={chat.postThumbnail}
+                    alt={chat.postTitle}
+                    className="h-10 w-10 rounded-md object-cover"
+                  />
+                )}
                 {chat.unreadCount > 0 && (
                   <Badge className="h-5 min-w-5 justify-center bg-blue-600 px-1.5 text-[10px] text-white">
                     {chat.unreadCount}

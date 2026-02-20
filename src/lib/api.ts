@@ -3,14 +3,29 @@
 // Phase B에서 이 파일만 Supabase 버전으로 교체하면 전환 완료
 // ============================================================
 
-import type { PostListItem, PostDetail, PostFilters, User } from './types';
+import type { Post, PostListItem, PostDetail, PostFilters, User } from './types';
 import { mockPosts, toPostListItem, getPostImages, getPostTags } from '@/data/posts';
 import { universities } from '@/data/universities';
 import { categories } from '@/data/categories';
 import { getUserSummary, mockUsers } from '@/data/users';
+import { STORAGE_KEYS } from './constants';
+
+// localStorage에서 사용자 생성 게시글 가져오기
+function getLocalPosts(): Post[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const saved = localStorage.getItem(STORAGE_KEYS.USER_POSTS);
+    return saved ? JSON.parse(saved) : [];
+  } catch { return []; }
+}
+
+// 모든 게시글 (mock + localStorage)
+function getAllPosts(): Post[] {
+  return [...mockPosts, ...getLocalPosts()];
+}
 
 export async function getPosts(filters?: PostFilters): Promise<PostListItem[]> {
-  let posts = [...mockPosts].filter(p => p.status === 'active');
+  let posts = getAllPosts().filter(p => p.status === 'active');
 
   if (filters?.universitySlug) {
     const uni = universities.find(u => u.slug === filters.universitySlug);
@@ -71,7 +86,7 @@ export async function getPosts(filters?: PostFilters): Promise<PostListItem[]> {
 }
 
 export async function getPostDetail(postId: string): Promise<PostDetail | null> {
-  const post = mockPosts.find(p => p.id === postId);
+  const post = getAllPosts().find(p => p.id === postId);
   if (!post) return null;
 
   const uni = universities.find(u => u.id === post.universityId);
@@ -92,17 +107,18 @@ export async function getPostDetail(postId: string): Promise<PostDetail | null> 
 }
 
 export async function getRelatedPosts(postId: string, limit = 4): Promise<PostListItem[]> {
-  const post = mockPosts.find(p => p.id === postId);
+  const allPosts = getAllPosts();
+  const post = allPosts.find(p => p.id === postId);
   if (!post) return [];
 
   // 같은 대학 + 같은 대분류 카테고리에서 추천
-  const related = mockPosts
+  const related = allPosts
     .filter(p => p.id !== postId && p.status === 'active' && p.universityId === post.universityId && p.categoryMajorId === post.categoryMajorId)
     .slice(0, limit);
 
   // 부족하면 같은 대학 다른 카테고리에서 보충
   if (related.length < limit) {
-    const more = mockPosts
+    const more = allPosts
       .filter(p => p.id !== postId && p.status === 'active' && p.universityId === post.universityId && !related.some(r => r.id === p.id))
       .slice(0, limit - related.length);
     related.push(...more);
@@ -124,8 +140,50 @@ export async function getUserById(userId: string): Promise<User | null> {
 }
 
 export async function getUserPosts(userId: string): Promise<PostListItem[]> {
-  const posts = mockPosts
+  const posts = getAllPosts()
     .filter(p => p.authorId === userId)
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   return posts.map(toPostListItem);
+}
+
+// 게시글 생성 (localStorage에 저장)
+export function createPost(input: {
+  title: string;
+  body: string;
+  universityId: number;
+  categoryMajorId: number;
+  categoryMinorId: number;
+  price: number | null;
+  priceNegotiable: boolean;
+  locationDetail: string | null;
+  tags: string[];
+}): Post {
+  const now = new Date().toISOString();
+  const post: Post = {
+    id: `local-${Date.now()}`,
+    title: input.title,
+    body: input.body,
+    authorId: 'u1', // Phase A: 하드코딩 사용자
+    universityId: input.universityId,
+    categoryMajorId: input.categoryMajorId,
+    categoryMinorId: input.categoryMinorId,
+    price: input.price,
+    priceNegotiable: input.priceNegotiable,
+    isPremium: false,
+    status: 'active',
+    locationDetail: input.locationDetail,
+    viewCount: 0,
+    likeCount: 0,
+    bumpedAt: now,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  try {
+    const saved = getLocalPosts();
+    saved.push(post);
+    localStorage.setItem(STORAGE_KEYS.USER_POSTS, JSON.stringify(saved));
+  } catch { /* storage full */ }
+
+  return post;
 }

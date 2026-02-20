@@ -7,6 +7,8 @@ export const STORAGE_KEYS = {
   LIKED_POSTS: 'campulist_liked_posts',
   WRITE_DRAFT: 'campulist_write_draft',
   RECENT_SEARCHES: 'campulist_recent_searches',
+  CHAT_MESSAGES: 'campulist_chat_messages',
+  USER_POSTS: 'campulist_user_posts',
 } as const;
 
 export const LIMITS = {

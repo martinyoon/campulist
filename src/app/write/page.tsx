@@ -9,6 +9,7 @@ import { universities } from '@/data/universities';
 import { majorCategories, getMinorCategories } from '@/data/categories';
 import { STORAGE_KEYS } from '@/lib/constants';
 import { useToast } from '@/components/ui/Toast';
+import { createPost } from '@/lib/api';
 
 interface WriteDraft {
   title: string;
@@ -109,10 +110,22 @@ export default function WritePage() {
     const errs = validate();
     setErrors(errs);
     if (Object.keys(errs).length > 0) return;
-    // Phase A: 제출 후 임시저장 삭제
+
+    const post = createPost({
+      title: title.trim(),
+      body: body.trim(),
+      universityId,
+      categoryMajorId: majorId!,
+      categoryMinorId: minorId!,
+      price: price ? Number(price) : null,
+      priceNegotiable,
+      locationDetail: location.trim() || null,
+      tags,
+    });
+
     clearDraft();
     toast('게시글이 등록되었습니다!');
-    router.push('/');
+    router.push(`/post/${post.id}`);
   };
 
   return (
