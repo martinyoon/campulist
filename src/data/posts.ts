@@ -118,7 +118,14 @@ export function getPostImages(postId: string): string[] {
 }
 
 export function getPostTags(postId: string): string[] {
-  return postTags[postId] || [];
+  if (postTags[postId]) return postTags[postId];
+  // localStorage에서 로컬 게시글 태그 조회
+  if (typeof window === 'undefined') return [];
+  try {
+    const saved = localStorage.getItem('campulist_post_tags');
+    const allTags: Record<string, string[]> = saved ? JSON.parse(saved) : {};
+    return allTags[postId] || [];
+  } catch { return []; }
 }
 
 export function toPostListItem(post: Post): PostListItem {

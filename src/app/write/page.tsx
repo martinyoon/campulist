@@ -41,6 +41,7 @@ export default function WritePage() {
   const [lastSaved, setLastSaved] = useState<string | null>(null);
   const [editId, setEditId] = useState<string | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   // 수정 모드 또는 임시저장 불러오기
   useEffect(() => {
@@ -132,14 +133,18 @@ export default function WritePage() {
     if (!title.trim()) errs.title = '제목을 입력해주세요';
     if (!body.trim()) errs.body = '내용을 입력해주세요';
     if (!majorId) errs.category = '카테고리를 선택해주세요';
+    else if (!minorId) errs.category = '세부 카테고리를 선택해주세요';
     if (price && Number(price) < 0) errs.price = '올바른 가격을 입력해주세요';
     return errs;
   };
 
   const handleSubmit = () => {
+    if (submitting) return;
     const errs = validate();
     setErrors(errs);
     if (Object.keys(errs).length > 0) return;
+
+    setSubmitting(true);
 
     const postData = {
       title: title.trim(),
@@ -153,7 +158,7 @@ export default function WritePage() {
     };
 
     if (isEditMode && editId) {
-      updatePost(editId, postData);
+      updatePost(editId, { ...postData, tags });
       toast('게시글이 수정되었습니다!');
       router.push(`/post/${editId}`);
     } else {
@@ -266,6 +271,7 @@ export default function WritePage() {
           <div className="flex items-center gap-2">
             <Input
               type="number"
+              min="0"
               placeholder="가격 입력 (없으면 비워두세요)"
               value={price}
               onChange={e => setPrice(e.target.value)}
@@ -350,10 +356,10 @@ export default function WritePage() {
         {/* 등록 버튼 */}
         <Button
           onClick={handleSubmit}
-          disabled={!title || !majorId || !minorId}
+          disabled={!title || !majorId || !minorId || submitting}
           className="w-full bg-blue-600 py-6 text-base hover:bg-blue-700"
         >
-          {isEditMode ? '수정하기' : '등록하기'}
+          {submitting ? '처리 중...' : isEditMode ? '수정하기' : '등록하기'}
         </Button>
       </div>
     </div>

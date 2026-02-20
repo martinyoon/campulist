@@ -199,6 +199,7 @@ export function updatePost(postId: string, input: {
   price: number | null;
   priceNegotiable: boolean;
   locationDetail: string | null;
+  tags?: string[];
 }): void {
   const now = new Date().toISOString();
   // localStorage 게시글: 직접 수정
@@ -206,15 +207,27 @@ export function updatePost(postId: string, input: {
     const localPosts = getLocalPosts();
     const idx = localPosts.findIndex(p => p.id === postId);
     if (idx >= 0) {
-      localPosts[idx] = { ...localPosts[idx], ...input, updatedAt: now };
+      const { tags: _tags, ...postInput } = input;
+      localPosts[idx] = { ...localPosts[idx], ...postInput, updatedAt: now };
       localStorage.setItem(STORAGE_KEYS.USER_POSTS, JSON.stringify(localPosts));
     }
-    return;
+  } else {
+    // mock 게시글: 오버라이드
+    const { tags: _tags, ...postInput } = input;
+    const overrides = getPostOverrides();
+    overrides[postId] = { ...overrides[postId], ...postInput, updatedAt: now };
+    savePostOverrides(overrides);
   }
-  // mock 게시글: 오버라이드
-  const overrides = getPostOverrides();
-  overrides[postId] = { ...overrides[postId], ...input, updatedAt: now };
-  savePostOverrides(overrides);
+
+  // 태그 저장
+  if (input.tags) {
+    try {
+      const savedTags = localStorage.getItem(STORAGE_KEYS.POST_TAGS);
+      const allTags: Record<string, string[]> = savedTags ? JSON.parse(savedTags) : {};
+      allTags[postId] = input.tags;
+      localStorage.setItem(STORAGE_KEYS.POST_TAGS, JSON.stringify(allTags));
+    } catch { /* storage full */ }
+  }
 }
 
 // 게시글 삭제
@@ -268,6 +281,16 @@ export function createPost(input: {
     saved.push(post);
     localStorage.setItem(STORAGE_KEYS.USER_POSTS, JSON.stringify(saved));
   } catch { /* storage full */ }
+
+  // 태그 저장
+  if (input.tags.length > 0) {
+    try {
+      const savedTags = localStorage.getItem(STORAGE_KEYS.POST_TAGS);
+      const allTags: Record<string, string[]> = savedTags ? JSON.parse(savedTags) : {};
+      allTags[post.id] = input.tags;
+      localStorage.setItem(STORAGE_KEYS.POST_TAGS, JSON.stringify(allTags));
+    } catch { /* storage full */ }
+  }
 
   return post;
 }

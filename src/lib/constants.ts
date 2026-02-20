@@ -14,6 +14,7 @@ export const STORAGE_KEYS = {
   RECENT_VIEWED: 'campulist_recent_viewed',
   NOTIFICATION_READ: 'campulist_notification_read',
   REPORTS: 'campulist_reports',
+  POST_TAGS: 'campulist_post_tags',
 } as const;
 
 export const LIMITS = {
