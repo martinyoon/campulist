@@ -11,6 +11,8 @@ import PostCard from '@/components/post/PostCard';
 import ReportButton from '@/components/post/ReportButton';
 import LikeButton from '@/components/post/LikeButton';
 import ShareButton from '@/components/post/ShareButton';
+import PostStatusControl from '@/components/post/PostStatusControl';
+import PostBottomAction from '@/components/post/PostBottomAction';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -124,6 +126,9 @@ export default async function PostDetailPage({ params }: Props) {
         )}
       </div>
 
+      {/* A1: 거래 상태 변경 (작성자만 표시) */}
+      <PostStatusControl postId={post.id} authorId={post.authorId} initialStatus={post.status} />
+
       {/* 관련 게시글 */}
       {relatedPosts.length > 0 && (
         <>
@@ -148,9 +153,13 @@ export default async function PostDetailPage({ params }: Props) {
             <p className="text-lg font-bold">{formatPrice(post.price)}</p>
             {post.priceNegotiable && <p className="text-xs text-muted-foreground">가격 협의 가능</p>}
           </div>
-          <Button className="bg-blue-600 px-8 text-white hover:bg-blue-700">
-            채팅하기
-          </Button>
+          <PostBottomAction
+            postId={post.id}
+            postTitle={post.title}
+            postPrice={post.price}
+            postThumbnail={post.images[0] || null}
+            author={post.author}
+          />
         </div>
       </div>
     </div>

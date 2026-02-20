@@ -6,9 +6,9 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { getChatRoom, getChatMessages, CURRENT_USER_ID } from '@/data/chats';
+import { getChatMessages, CURRENT_USER_ID } from '@/data/chats';
+import { getChatRoomById } from '@/lib/api';
 import { formatPrice } from '@/lib/format';
-import { formatRelativeTime } from '@/lib/format';
 import { STORAGE_KEYS } from '@/lib/constants';
 import type { ChatMessage } from '@/lib/types';
 
@@ -16,7 +16,7 @@ export default function ChatDetailPage() {
   const params = useParams();
   const router = useRouter();
   const roomId = params.id as string;
-  const room = getChatRoom(roomId);
+  const room = getChatRoomById(roomId);
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');

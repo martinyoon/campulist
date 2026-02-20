@@ -3,11 +3,12 @@
 // Phase B에서 이 파일만 Supabase 버전으로 교체하면 전환 완료
 // ============================================================
 
-import type { Post, PostListItem, PostDetail, PostFilters, User } from './types';
+import type { Post, PostListItem, PostDetail, PostFilters, PostStatus, User, ChatRoom, UserSummary } from './types';
 import { mockPosts, toPostListItem, getPostImages, getPostTags } from '@/data/posts';
 import { universities } from '@/data/universities';
 import { categories } from '@/data/categories';
 import { getUserSummary, mockUsers } from '@/data/users';
+import { mockChatRooms } from '@/data/chats';
 import { STORAGE_KEYS } from './constants';
 
 // localStorage에서 사용자 생성 게시글 가져오기
@@ -19,9 +20,30 @@ function getLocalPosts(): Post[] {
   } catch { return []; }
 }
 
-// 모든 게시글 (mock + localStorage)
+// localStorage에서 게시글 오버라이드 가져오기 (상태변경, 끌올 등)
+function getPostOverrides(): Record<string, Partial<Post>> {
+  if (typeof window === 'undefined') return {};
+  try {
+    const saved = localStorage.getItem(STORAGE_KEYS.POST_OVERRIDES);
+    return saved ? JSON.parse(saved) : {};
+  } catch { return {}; }
+}
+
+function savePostOverrides(overrides: Record<string, Partial<Post>>): void {
+  try {
+    localStorage.setItem(STORAGE_KEYS.POST_OVERRIDES, JSON.stringify(overrides));
+  } catch { /* storage full */ }
+}
+
+// 모든 게시글 (mock + localStorage + 오버라이드 적용)
 function getAllPosts(): Post[] {
-  return [...mockPosts, ...getLocalPosts()];
+  const posts = [...mockPosts, ...getLocalPosts()];
+  const overrides = getPostOverrides();
+  if (Object.keys(overrides).length === 0) return posts;
+  return posts.map(p => {
+    const override = overrides[p.id];
+    return override ? { ...p, ...override } : p;
+  });
 }
 
 export async function getPosts(filters?: PostFilters): Promise<PostListItem[]> {
@@ -141,9 +163,71 @@ export async function getUserById(userId: string): Promise<User | null> {
 
 export async function getUserPosts(userId: string): Promise<PostListItem[]> {
   const posts = getAllPosts()
-    .filter(p => p.authorId === userId)
+    .filter(p => p.authorId === userId && p.status !== 'hidden')
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   return posts.map(toPostListItem);
+}
+
+// 동기 함수: 클라이언트 컴포넌트용
+export function getMyPosts(userId: string): PostListItem[] {
+  return getAllPosts()
+    .filter(p => p.authorId === userId && p.status !== 'hidden')
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .map(toPostListItem);
+}
+
+export function getPostsByIds(postIds: string[]): PostListItem[] {
+  return getAllPosts()
+    .filter(p => postIds.includes(p.id) && p.status !== 'hidden')
+    .map(toPostListItem);
+}
+
+// 수정용 게시글 조회
+export function getPostForEdit(postId: string): (Post & { tags: string[] }) | null {
+  const post = getAllPosts().find(p => p.id === postId);
+  if (!post) return null;
+  return { ...post, tags: getPostTags(postId) };
+}
+
+// 게시글 수정
+export function updatePost(postId: string, input: {
+  title: string;
+  body: string;
+  universityId: number;
+  categoryMajorId: number;
+  categoryMinorId: number;
+  price: number | null;
+  priceNegotiable: boolean;
+  locationDetail: string | null;
+}): void {
+  const now = new Date().toISOString();
+  // localStorage 게시글: 직접 수정
+  if (postId.startsWith('local-')) {
+    const localPosts = getLocalPosts();
+    const idx = localPosts.findIndex(p => p.id === postId);
+    if (idx >= 0) {
+      localPosts[idx] = { ...localPosts[idx], ...input, updatedAt: now };
+      localStorage.setItem(STORAGE_KEYS.USER_POSTS, JSON.stringify(localPosts));
+    }
+    return;
+  }
+  // mock 게시글: 오버라이드
+  const overrides = getPostOverrides();
+  overrides[postId] = { ...overrides[postId], ...input, updatedAt: now };
+  savePostOverrides(overrides);
+}
+
+// 게시글 삭제
+export function deletePost(postId: string): void {
+  // localStorage 게시글: 완전 삭제
+  if (postId.startsWith('local-')) {
+    const localPosts = getLocalPosts();
+    const filtered = localPosts.filter(p => p.id !== postId);
+    localStorage.setItem(STORAGE_KEYS.USER_POSTS, JSON.stringify(filtered));
+    return;
+  }
+  // mock 게시글: hidden 처리
+  updatePostStatus(postId, 'hidden');
 }
 
 // 게시글 생성 (localStorage에 저장)
@@ -186,4 +270,69 @@ export function createPost(input: {
   } catch { /* storage full */ }
 
   return post;
+}
+
+// A1: 게시글 상태 변경 (localStorage 오버라이드)
+export function updatePostStatus(postId: string, status: PostStatus): void {
+  const overrides = getPostOverrides();
+  overrides[postId] = { ...overrides[postId], status, updatedAt: new Date().toISOString() };
+  savePostOverrides(overrides);
+}
+
+// A2: 게시글 끌어올리기
+export function bumpPost(postId: string): void {
+  const now = new Date().toISOString();
+  const overrides = getPostOverrides();
+  overrides[postId] = { ...overrides[postId], bumpedAt: now, updatedAt: now };
+  savePostOverrides(overrides);
+}
+
+// B2: localStorage 채팅방 관리
+function getLocalChatRooms(): ChatRoom[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const saved = localStorage.getItem(STORAGE_KEYS.CHAT_ROOMS);
+    return saved ? JSON.parse(saved) : [];
+  } catch { return []; }
+}
+
+export function getAllChatRooms(): ChatRoom[] {
+  return [...mockChatRooms, ...getLocalChatRooms()];
+}
+
+export function getChatRoomById(roomId: string): ChatRoom | null {
+  return getAllChatRooms().find(r => r.id === roomId) || null;
+}
+
+export function findChatRoomByPost(postId: string): ChatRoom | null {
+  return getAllChatRooms().find(r => r.postId === postId) || null;
+}
+
+export function createChatRoom(input: {
+  postId: string;
+  postTitle: string;
+  postPrice: number | null;
+  postThumbnail: string | null;
+  otherUser: UserSummary;
+}): ChatRoom {
+  const room: ChatRoom = {
+    id: `chat-local-${Date.now()}`,
+    postId: input.postId,
+    postTitle: input.postTitle,
+    postPrice: input.postPrice,
+    postThumbnail: input.postThumbnail,
+    otherUser: input.otherUser,
+    lastMessage: null,
+    lastMessageAt: null,
+    unreadCount: 0,
+    createdAt: new Date().toISOString(),
+  };
+
+  try {
+    const rooms = getLocalChatRooms();
+    rooms.push(room);
+    localStorage.setItem(STORAGE_KEYS.CHAT_ROOMS, JSON.stringify(rooms));
+  } catch { /* storage full */ }
+
+  return room;
 }

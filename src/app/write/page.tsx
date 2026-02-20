@@ -9,7 +9,7 @@ import { universities } from '@/data/universities';
 import { majorCategories, getMinorCategories } from '@/data/categories';
 import { STORAGE_KEYS } from '@/lib/constants';
 import { useToast } from '@/components/ui/Toast';
-import { createPost } from '@/lib/api';
+import { createPost, getPostForEdit, updatePost } from '@/lib/api';
 
 interface WriteDraft {
   title: string;
@@ -39,9 +39,34 @@ export default function WritePage() {
   const [location, setLocation] = useState('');
   const [draftLoaded, setDraftLoaded] = useState(false);
   const [lastSaved, setLastSaved] = useState<string | null>(null);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
 
-  // localStorage에서 임시저장 불러오기
+  // 수정 모드 또는 임시저장 불러오기
   useEffect(() => {
+    // URL에서 edit 파라미터 확인
+    const params = new URLSearchParams(window.location.search);
+    const editParam = params.get('edit');
+
+    if (editParam) {
+      const post = getPostForEdit(editParam);
+      if (post && post.authorId === 'u1') {
+        setEditId(editParam);
+        setIsEditMode(true);
+        setTitle(post.title);
+        setBody(post.body);
+        setPrice(post.price?.toString() || '');
+        setPriceNegotiable(post.priceNegotiable);
+        setUniversityId(post.universityId);
+        setMajorId(post.categoryMajorId);
+        setMinorId(post.categoryMinorId);
+        setTags(post.tags);
+        setLocation(post.locationDetail || '');
+        return; // 수정 모드에서는 임시저장 로드 스킵
+      }
+    }
+
+    // 새 글쓰기: 임시저장 불러오기
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.WRITE_DRAFT);
       if (saved) {
@@ -61,8 +86,9 @@ export default function WritePage() {
     } catch { /* ignore parse errors */ }
   }, []);
 
-  // 자동 임시저장 (1초 디바운스)
+  // 자동 임시저장 (1초 디바운스, 수정 모드에서는 비활성)
   const saveDraft = useCallback(() => {
+    if (isEditMode) return;
     const draft: WriteDraft = {
       title, body, price, priceNegotiable,
       universityId, majorId, minorId, tags, location,
@@ -74,7 +100,7 @@ export default function WritePage() {
       localStorage.setItem(STORAGE_KEYS.WRITE_DRAFT, JSON.stringify(draft));
       setLastSaved(draft.savedAt);
     } catch { /* storage full — ignore */ }
-  }, [title, body, price, priceNegotiable, universityId, majorId, minorId, tags, location]);
+  }, [isEditMode, title, body, price, priceNegotiable, universityId, majorId, minorId, tags, location]);
 
   useEffect(() => {
     const timer = setTimeout(saveDraft, 1000);
@@ -111,7 +137,7 @@ export default function WritePage() {
     setErrors(errs);
     if (Object.keys(errs).length > 0) return;
 
-    const post = createPost({
+    const postData = {
       title: title.trim(),
       body: body.trim(),
       universityId,
@@ -120,18 +146,24 @@ export default function WritePage() {
       price: price ? Number(price) : null,
       priceNegotiable,
       locationDetail: location.trim() || null,
-      tags,
-    });
+    };
 
-    clearDraft();
-    toast('게시글이 등록되었습니다!');
-    router.push(`/post/${post.id}`);
+    if (isEditMode && editId) {
+      updatePost(editId, postData);
+      toast('게시글이 수정되었습니다!');
+      router.push(`/post/${editId}`);
+    } else {
+      const post = createPost({ ...postData, tags });
+      clearDraft();
+      toast('게시글이 등록되었습니다!');
+      router.push(`/post/${post.id}`);
+    }
   };
 
   return (
     <div className="px-4 py-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">글쓰기</h1>
+        <h1 className="text-xl font-bold">{isEditMode ? '글 수정' : '글쓰기'}</h1>
         <div className="flex items-center gap-2">
           {lastSaved && (
             <span className="text-xs text-muted-foreground">
@@ -314,7 +346,7 @@ export default function WritePage() {
           disabled={!title || !majorId || !minorId}
           className="w-full bg-blue-600 py-6 text-base hover:bg-blue-700"
         >
-          등록하기
+          {isEditMode ? '수정하기' : '등록하기'}
         </Button>
       </div>
     </div>

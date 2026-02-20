@@ -9,6 +9,8 @@ export const STORAGE_KEYS = {
   RECENT_SEARCHES: 'campulist_recent_searches',
   CHAT_MESSAGES: 'campulist_chat_messages',
   USER_POSTS: 'campulist_user_posts',
+  POST_OVERRIDES: 'campulist_post_overrides',
+  CHAT_ROOMS: 'campulist_chat_rooms',
 } as const;
 
 export const LIMITS = {

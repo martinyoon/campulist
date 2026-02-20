@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import EmptyState from '@/components/ui/EmptyState';
-import { mockPosts, toPostListItem } from '@/data/posts';
+import { getMyPosts, getPostsByIds } from '@/lib/api';
 import { formatPrice, formatRelativeTime } from '@/lib/format';
+import type { PostListItem } from '@/lib/types';
 import { STORAGE_KEYS } from '@/lib/constants';
 import { useToast } from '@/components/ui/Toast';
 
@@ -24,10 +25,15 @@ function getLikedPostIds(): string[] {
 export default function MyPage() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<Tab>('selling');
-  const [likedIds, setLikedIds] = useState<string[]>([]);
+  const [myPosts, setMyPosts] = useState<PostListItem[]>([]);
+  const [likedPosts, setLikedPosts] = useState<PostListItem[]>([]);
 
   useEffect(() => {
-    setLikedIds(getLikedPostIds());
+    setMyPosts(getMyPosts('u1'));
+    const ids = getLikedPostIds();
+    if (ids.length > 0) {
+      setLikedPosts(getPostsByIds(ids));
+    }
   }, []);
 
   // Mock 현재 사용자 (u1 서연이)
@@ -41,15 +47,6 @@ export default function MyPage() {
     mannerTemp: 38.2,
     tradeCount: 12,
   };
-
-  const myPosts = mockPosts
-    .filter(p => p.authorId === currentUser.id)
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .map(toPostListItem);
-
-  const likedPosts = mockPosts
-    .filter(p => likedIds.includes(p.id))
-    .map(toPostListItem);
 
   // Mock 후기 데이터
   const mockReviews = [

@@ -1,10 +1,25 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
-import { mockChatRooms } from '@/data/chats';
+import { getAllChatRooms } from '@/lib/api';
 import { formatRelativeTime } from '@/lib/format';
+import type { ChatRoom } from '@/lib/types';
 
 export default function ChatPage() {
-  const chats = mockChatRooms;
+  const [chats, setChats] = useState<ChatRoom[]>([]);
+
+  useEffect(() => {
+    const rooms = getAllChatRooms();
+    // 최신 메시지 순 정렬
+    rooms.sort((a, b) => {
+      const aTime = a.lastMessageAt || a.createdAt;
+      const bTime = b.lastMessageAt || b.createdAt;
+      return new Date(bTime).getTime() - new Date(aTime).getTime();
+    });
+    setChats(rooms);
+  }, []);
 
   return (
     <div>
@@ -35,7 +50,9 @@ export default function ChatPage() {
                     {chat.lastMessageAt ? formatRelativeTime(chat.lastMessageAt) : ''}
                   </span>
                 </div>
-                <p className="truncate text-sm text-muted-foreground">{chat.lastMessage}</p>
+                <p className="truncate text-sm text-muted-foreground">
+                  {chat.lastMessage || '채팅을 시작해보세요'}
+                </p>
                 <p className="mt-0.5 truncate text-xs text-muted-foreground/70">{chat.postTitle}</p>
               </div>
 
