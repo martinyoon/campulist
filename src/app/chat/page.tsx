@@ -6,12 +6,13 @@ import { Badge } from '@/components/ui/badge';
 import { getAllChatRooms } from '@/lib/api';
 import { formatRelativeTime } from '@/lib/format';
 import type { ChatRoom } from '@/lib/types';
+import AuthGuard from '@/components/auth/AuthGuard';
 
-export default function ChatPage() {
+function ChatPageContent() {
   const [chats, setChats] = useState<ChatRoom[]>([]);
 
   useEffect(() => {
-    document.title = '채팅 | 캠푸리스트';
+    document.title = '채팅 | 캠퍼스리스트';
     const rooms = getAllChatRooms();
     // 최신 메시지 순 정렬
     rooms.sort((a, b) => {
@@ -86,5 +87,13 @@ export default function ChatPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function ChatPage() {
+  return (
+    <AuthGuard>
+      <ChatPageContent />
+    </AuthGuard>
   );
 }

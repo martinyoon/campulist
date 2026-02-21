@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { getPosts, getUniversityBySlug } from '@/lib/api';
 import UniversityTabs from '@/components/post/UniversityTabs';
 import CategoryGrid from '@/components/post/CategoryGrid';
-import PostCard from '@/components/post/PostCard';
+import PostFeedWithLocal from '@/components/post/PostFeedWithLocal';
 import EmptyState from '@/components/ui/EmptyState';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
@@ -16,10 +16,10 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { university: slug } = await params;
   const university = await getUniversityBySlug(slug);
-  if (!university) return { title: '캠푸리스트' };
+  if (!university) return { title: '캠퍼스리스트' };
   return {
-    title: `${university.name} | 캠푸리스트`,
-    description: `${university.name} 캠퍼스 중고거래, 주거, 일자리, 커뮤니티 - 캠푸리스트`,
+    title: `${university.name} | 캠퍼스리스트`,
+    description: `${university.name} 캠퍼스 중고거래, 주거, 일자리, 커뮤니티 - 캠퍼스리스트`,
   };
 }
 
@@ -71,13 +71,12 @@ export default async function UniversityPage({ params, searchParams }: Props) {
           ))}
         </div>
 
-        <div>
-          {posts.length > 0 ? (
-            posts.map(post => <PostCard key={post.id} post={post} />)
-          ) : (
-            <EmptyState message="아직 게시글이 없습니다." actionLabel="첫 번째 글 작성하기" actionHref="/write" />
-          )}
-        </div>
+        <PostFeedWithLocal
+          serverPosts={posts}
+          universityId={university.id}
+          sortBy={sortBy}
+          emptyState={<EmptyState message="아직 게시글이 없습니다." actionLabel="첫 번째 글 작성하기" actionHref="/write" />}
+        />
       </section>
     </div>
   );

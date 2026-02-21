@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Separator } from '@/components/ui/separator';
 
 export const metadata = {
-  title: '개인정보처리방침 | 캠푸리스트',
+  title: '개인정보처리방침 | 캠퍼스리스트',
 };
 
 export default function PrivacyPage() {
@@ -14,7 +14,7 @@ export default function PrivacyPage() {
       <h1 className="mt-4 text-2xl font-bold">개인정보처리방침</h1>
       <Separator className="my-6" />
       <div className="space-y-4 text-sm leading-relaxed text-foreground/80">
-        <p>캠푸리스트 개인정보처리방침은 현재 준비 중입니다.</p>
+        <p>캠퍼스리스트 개인정보처리방침은 현재 준비 중입니다.</p>
         <p>서비스 정식 출시 전까지 아래 기본 원칙이 적용됩니다:</p>
         <ul className="list-disc space-y-2 pl-5">
           <li>수집하는 개인정보: 학교 이메일, 닉네임, 게시글/채팅 내용</li>

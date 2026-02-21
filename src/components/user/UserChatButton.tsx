@@ -3,21 +3,22 @@
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { findChatRoomByUser, createChatRoom } from '@/lib/api';
-import { CURRENT_USER_ID } from '@/data/chats';
+import { useAuth } from '@/contexts/AuthContext';
 import type { UserSummary } from '@/lib/types';
 
 interface UserChatButtonProps {
   user: UserSummary;
 }
 
-export default function UserChatButton({ user }: UserChatButtonProps) {
+export default function UserChatButton({ user: profileUser }: UserChatButtonProps) {
   const router = useRouter();
+  const { user: currentUser } = useAuth();
 
   // 본인이면 표시하지 않음
-  if (user.id === CURRENT_USER_ID) return null;
+  if (!currentUser || profileUser.id === currentUser.id) return null;
 
   const handleChat = () => {
-    const existing = findChatRoomByUser(user.id);
+    const existing = findChatRoomByUser(profileUser.id);
     if (existing) {
       router.push(`/chat/${existing.id}`);
       return;
@@ -25,10 +26,10 @@ export default function UserChatButton({ user }: UserChatButtonProps) {
 
     const room = createChatRoom({
       postId: '',
-      postTitle: `${user.nickname}님과의 대화`,
+      postTitle: `${profileUser.nickname}님과의 대화`,
       postPrice: null,
       postThumbnail: null,
-      otherUser: user,
+      otherUser: profileUser,
     });
     router.push(`/chat/${room.id}`);
   };

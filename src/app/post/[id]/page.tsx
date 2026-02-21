@@ -23,10 +23,10 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const post = await getPostDetail(id);
-  if (!post) return { title: id.startsWith('local-') ? '게시글 | 캠푸리스트' : '게시글을 찾을 수 없습니다 | 캠푸리스트' };
+  if (!post) return { title: id.startsWith('local-') ? '게시글 | 캠퍼스리스트' : '게시글을 찾을 수 없습니다 | 캠퍼스리스트' };
   const price = post.price !== null ? formatPrice(post.price) : '';
   return {
-    title: `${post.title}${price ? ` - ${price}` : ''} | ${post.university.name} | 캠푸리스트`,
+    title: `${post.title}${price ? ` - ${price}` : ''} | ${post.university.name} | 캠퍼스리스트`,
     description: post.body.slice(0, 160),
     openGraph: {
       title: post.title,

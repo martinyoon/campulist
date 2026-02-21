@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/Toast';
 import { bumpPost, findChatRoomByPost, createChatRoom } from '@/lib/api';
-import { CURRENT_USER_ID } from '@/data/chats';
+import { useAuth } from '@/contexts/AuthContext';
 import type { UserSummary } from '@/lib/types';
 
 interface PostBottomActionProps {
@@ -19,11 +19,12 @@ interface PostBottomActionProps {
 export default function PostBottomAction({ postId, postTitle, postPrice, postThumbnail, author }: PostBottomActionProps) {
   const router = useRouter();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [isOwner, setIsOwner] = useState(false);
 
   useEffect(() => {
-    setIsOwner(author.id === CURRENT_USER_ID);
-  }, [author.id]);
+    setIsOwner(!!user && author.id === user.id);
+  }, [author.id, user]);
 
   // 본인 게시글: 끌어올리기 버튼
   if (isOwner) {

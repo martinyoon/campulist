@@ -10,10 +10,12 @@ import ThemeToggle from '@/components/ThemeToggle';
 import { universities } from '@/data/universities';
 import { majorCategories } from '@/data/categories';
 import { getUnreadNotificationCount } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [hasUnreadNotif, setHasUnreadNotif] = useState(false);
 
@@ -62,8 +64,9 @@ export default function Header() {
         </Sheet>
 
         {/* 로고 */}
-        <Link href="/" className="flex shrink-0 items-center gap-1.5">
-          <span className="text-xl font-bold text-blue-500">캠푸리스트</span>
+        <Link href="/" className="flex shrink-0 flex-col leading-tight">
+          <span className="text-xl font-bold text-blue-500">캠퍼스리스트</span>
+          <span className="text-[10px] text-muted-foreground">Campu(s)+list+.com = Campulist.com</span>
         </Link>
 
         {/* 검색 (데스크톱) */}
@@ -80,24 +83,34 @@ export default function Header() {
         {/* 우측 버튼 */}
         <div className="ml-auto flex items-center gap-1">
           <ThemeToggle />
-          <Link href="/write">
-            <Button size="sm" className="bg-blue-600 text-white hover:bg-blue-700">
-              글쓰기
-            </Button>
-          </Link>
-          <Link href="/notifications" className="relative">
-            <Button variant="ghost" size="icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
-            </Button>
-            {hasUnreadNotif && (
-              <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500" />
-            )}
-          </Link>
-          <Link href="/my">
-            <Button variant="ghost" size="icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="8" r="4" /><path d="M20 21a8 8 0 1 0-16 0" /></svg>
-            </Button>
-          </Link>
+          {user ? (
+            <>
+              <Link href="/write">
+                <Button size="sm" className="bg-blue-600 text-white hover:bg-blue-700">
+                  글쓰기
+                </Button>
+              </Link>
+              <Link href="/notifications" className="relative">
+                <Button variant="ghost" size="icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
+                </Button>
+                {hasUnreadNotif && (
+                  <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500" />
+                )}
+              </Link>
+              <Link href="/my">
+                <Button variant="ghost" size="icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="8" r="4" /><path d="M20 21a8 8 0 1 0-16 0" /></svg>
+                </Button>
+              </Link>
+            </>
+          ) : (
+            <Link href="/auth">
+              <Button size="sm" variant="outline">
+                로그인
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
 

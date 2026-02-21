@@ -6,7 +6,8 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { getChatMessages, CURRENT_USER_ID } from '@/data/chats';
+import { getChatMessages } from '@/data/chats';
+import { useAuth } from '@/contexts/AuthContext';
 import { getChatRoomById, clearChatUnread } from '@/lib/api';
 import { formatPrice } from '@/lib/format';
 import { STORAGE_KEYS } from '@/lib/constants';
@@ -15,6 +16,8 @@ import type { ChatMessage } from '@/lib/types';
 export default function ChatDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { user } = useAuth();
+  const currentUserId = user?.id ?? '';
   const roomId = params.id as string;
   const room = getChatRoomById(roomId);
 
@@ -24,7 +27,7 @@ export default function ChatDetailPage() {
 
   // 메시지 로드 (mock + localStorage) + 안읽음 초기화
   useEffect(() => {
-    if (room) document.title = `${room.otherUser.nickname} 채팅 | 캠푸리스트`;
+    if (room) document.title = `${room.otherUser.nickname} 채팅 | 캠퍼스리스트`;
     clearChatUnread(roomId);
     const mockMessages = getChatMessages(roomId);
     try {
@@ -60,7 +63,7 @@ export default function ChatDetailPage() {
     const newMsg: ChatMessage = {
       id: `local-${Date.now()}`,
       roomId,
-      senderId: CURRENT_USER_ID,
+      senderId: currentUserId,
       content: text,
       imageUrl: null,
       isRead: false,
@@ -117,7 +120,7 @@ export default function ChatDetailPage() {
       <div className="flex-1 overflow-y-auto px-4 py-4">
         <div className="space-y-3">
           {messages.map((msg, i) => {
-            const isMine = msg.senderId === CURRENT_USER_ID;
+            const isMine = msg.senderId === currentUserId;
             const showDate = i === 0 || new Date(msg.createdAt).toDateString() !== new Date(messages[i - 1].createdAt).toDateString();
 
             return (

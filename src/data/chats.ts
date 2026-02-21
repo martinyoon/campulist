@@ -1,8 +1,5 @@
 import type { ChatRoom, ChatMessage } from '@/lib/types';
 
-// 현재 사용자: u1 (서연이)
-export const CURRENT_USER_ID = 'u1';
-
 export const mockChatRooms: ChatRoom[] = [
   {
     id: 'chat-1',

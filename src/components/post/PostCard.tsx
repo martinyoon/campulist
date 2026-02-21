@@ -1,13 +1,27 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import type { PostListItem } from '@/lib/types';
 import { formatPrice, formatRelativeTime } from '@/lib/format';
 import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface PostCardProps {
   post: PostListItem;
 }
 
 export default function PostCard({ post }: PostCardProps) {
+  const router = useRouter();
+  const { user } = useAuth();
+  const isOwner = !!user && post.author.id === user.id;
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    router.push(`/write?edit=${post.id}`);
+  };
+
   return (
     <Link href={`/post/${post.id}`} className="flex gap-4 border-b border-border px-4 py-4 transition-colors hover:bg-muted/50">
       {/* 썸네일 */}
@@ -57,6 +71,18 @@ export default function PostCard({ post }: PostCardProps) {
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg>
               {post.likeCount}
             </span>
+          )}
+          {isOwner && (
+            <button
+              onClick={handleEdit}
+              className="ml-auto flex items-center gap-1.5 rounded-lg border border-blue-500/40 bg-blue-500/10 px-3 py-1.5 text-xs font-semibold text-blue-600 transition-colors hover:bg-blue-500/20"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+              </svg>
+              수정
+            </button>
           )}
         </div>
       </div>

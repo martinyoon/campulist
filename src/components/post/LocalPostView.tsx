@@ -38,7 +38,7 @@ export default function LocalPostView({ id }: LocalPostViewProps) {
       setRelatedPosts(rp);
       setLoading(false);
       if (p) {
-        document.title = `${p.title} | 캠푸리스트`;
+        document.title = `${p.title} | 캠퍼스리스트`;
       }
     }
     load();

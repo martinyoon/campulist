@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { getPosts, getUniversityBySlug } from '@/lib/api';
 import { getCategoryBySlug, getMinorCategories } from '@/data/categories';
 import UniversityTabs from '@/components/post/UniversityTabs';
-import PostCard from '@/components/post/PostCard';
+import PostFeedWithLocal from '@/components/post/PostFeedWithLocal';
 import EmptyState from '@/components/ui/EmptyState';
 import { Badge } from '@/components/ui/badge';
 
@@ -17,10 +17,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { university: uniSlug, category: catSlug } = await params;
   const university = await getUniversityBySlug(uniSlug);
   const category = getCategoryBySlug(catSlug);
-  if (!university || !category) return { title: '캠푸리스트' };
+  if (!university || !category) return { title: '캠퍼스리스트' };
   return {
-    title: `${category.icon} ${category.name} | ${university.name} | 캠푸리스트`,
-    description: `${university.name} ${category.name} 게시글 목록 - 캠푸리스트`,
+    title: `${category.icon} ${category.name} | ${university.name} | 캠퍼스리스트`,
+    description: `${university.name} ${category.name} 게시글 목록 - 캠퍼스리스트`,
   };
 }
 
@@ -112,13 +112,14 @@ export default async function CategoryPage({ params, searchParams }: Props) {
       </div>
 
       {/* 게시글 목록 */}
-      <div>
-        {posts.length > 0 ? (
-          posts.map(post => <PostCard key={post.id} post={post} />)
-        ) : (
-          <EmptyState message="이 카테고리에 게시글이 없습니다." actionLabel="글쓰기" actionHref="/write" />
-        )}
-      </div>
+      <PostFeedWithLocal
+        serverPosts={posts}
+        universityId={university.id}
+        categoryMajorId={category.id}
+        categoryMinorId={minorSlug ? minors.find(m => m.slug === minorSlug)?.id : undefined}
+        sortBy={sortBy}
+        emptyState={<EmptyState message="이 카테고리에 게시글이 없습니다." actionLabel="글쓰기" actionHref="/write" />}
+      />
     </div>
   );
 }

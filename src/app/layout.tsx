@@ -6,6 +6,7 @@ import Header from "@/components/layout/Header";
 import BottomNav from "@/components/layout/BottomNav";
 import ScrollToTop from "@/components/layout/ScrollToTop";
 import { ToastProvider } from "@/components/ui/Toast";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,7 +14,7 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "캠푸리스트 - 캠퍼스의 모든 것",
+  title: "캠퍼스리스트 - 캠퍼스의 모든 것",
   description: "대학 캠퍼스를 중심으로 한 한국형 크레이그리스트. 중고거래, 주거, 일자리, 커뮤니티까지.",
 };
 
@@ -26,14 +27,16 @@ export default function RootLayout({
     <html lang="ko" suppressHydrationWarning>
       <body className={`${geistSans.variable} font-sans antialiased bg-background text-foreground`}>
         <ThemeProvider>
-          <ToastProvider>
-            <Header />
-            <main className="mx-auto min-h-screen max-w-5xl pb-16 md:pb-0">
-              {children}
-            </main>
-            <BottomNav />
-            <ScrollToTop />
-          </ToastProvider>
+          <AuthProvider>
+            <ToastProvider>
+              <Header />
+              <main className="mx-auto min-h-screen max-w-5xl pb-16 md:pb-0">
+                {children}
+              </main>
+              <BottomNav />
+              <ScrollToTop />
+            </ToastProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

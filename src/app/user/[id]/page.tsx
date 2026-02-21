@@ -1,35 +1,57 @@
-import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-import { getUserById, getUserPosts } from '@/lib/api';
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
+import { getUserPosts } from '@/lib/api';
+import { getFullUser } from '@/lib/auth';
 import { universities } from '@/data/universities';
 import { formatRelativeTime } from '@/lib/format';
-import PostCard from '@/components/post/PostCard';
+import PostFeedWithLocal from '@/components/post/PostFeedWithLocal';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import EmptyState from '@/components/ui/EmptyState';
 import UserChatButton from '@/components/user/UserChatButton';
+import type { User, MemberType, PostListItem } from '@/lib/types';
 
-interface Props {
-  params: Promise<{ id: string }>;
-}
+const MEMBER_TYPE_LABELS: Record<MemberType, string> = {
+  undergraduate: '🎓 학부생',
+  graduate: '📚 대학원생',
+  professor: '👨‍🏫 교수',
+  staff: '🏢 교직원',
+  alumni: '🎒 졸업생',
+  merchant: '🏪 인근상인',
+  general: '👤 일반인',
+};
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { id } = await params;
-  const user = await getUserById(id);
-  if (!user) return { title: '사용자를 찾을 수 없습니다 | 캠푸리스트' };
-  return {
-    title: `${user.nickname}님의 프로필 | 캠푸리스트`,
-    description: `${user.nickname}님의 판매 게시글 - 캠푸리스트`,
-  };
-}
+export default function UserProfilePage() {
+  const params = useParams<{ id: string }>();
+  const id = params.id;
+  const [user, setUser] = useState<User | null>(null);
+  const [posts, setPosts] = useState<PostListItem[]>([]);
+  const [notFound, setNotFound] = useState(false);
 
-export default async function UserProfilePage({ params }: Props) {
-  const { id } = await params;
-  const [user, posts] = await Promise.all([
-    getUserById(id),
-    getUserPosts(id),
-  ]);
-  if (!user) notFound();
+  useEffect(() => {
+    const found = getFullUser(id);
+    if (!found) {
+      setNotFound(true);
+      document.title = '사용자를 찾을 수 없습니다 | 캠퍼스리스트';
+      return;
+    }
+    setUser(found);
+    document.title = `${found.nickname}님의 프로필 | 캠퍼스리스트`;
+
+    getUserPosts(id).then(setPosts);
+  }, [id]);
+
+  if (notFound) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20">
+        <p className="text-lg font-medium text-muted-foreground">사용자를 찾을 수 없습니다</p>
+      </div>
+    );
+  }
+
+  if (!user) return null;
 
   const university = universities.find(u => u.id === user.universityId);
   const activePosts = posts.filter(p => p.status === 'active');
@@ -58,11 +80,9 @@ export default async function UserProfilePage({ params }: Props) {
                 </Badge>
               )}
             </div>
-            {university && (
-              <p className="text-sm text-muted-foreground">
-                {university.name}{user.department ? ` · ${user.department}` : ''}
-              </p>
-            )}
+            <p className="text-sm text-muted-foreground">
+              {university?.name ?? ''} · {MEMBER_TYPE_LABELS[user.memberType]}{user.department ? ` · ${user.department}` : ''}
+            </p>
             <p className="text-xs text-muted-foreground">
               가입일 {formatRelativeTime(user.createdAt)}
             </p>
@@ -104,11 +124,11 @@ export default async function UserProfilePage({ params }: Props) {
           </span>
         </div>
 
-        {posts.length > 0 ? (
-          posts.map(post => <PostCard key={post.id} post={post} />)
-        ) : (
-          <EmptyState message="등록된 게시글이 없습니다." />
-        )}
+        <PostFeedWithLocal
+          serverPosts={posts}
+          authorId={id}
+          emptyState={<EmptyState message="등록된 게시글이 없습니다." />}
+        />
       </section>
     </div>
   );

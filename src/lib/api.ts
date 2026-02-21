@@ -133,19 +133,26 @@ export async function getRelatedPosts(postId: string, limit = 4): Promise<PostLi
   const post = allPosts.find(p => p.id === postId);
   if (!post) return [];
 
-  // 같은 대학 + 같은 대분류 카테고리에서 추천
-  const related = allPosts
-    .filter(p => p.id !== postId && p.status === 'active' && p.universityId === post.universityId && p.categoryMajorId === post.categoryMajorId)
-    .slice(0, limit);
+  const active = allPosts.filter(p => p.id !== postId && p.status === 'active' && p.universityId === post.universityId);
+  const byRecent = (a: typeof allPosts[0], b: typeof allPosts[0]) =>
+    new Date(b.bumpedAt).getTime() - new Date(a.bumpedAt).getTime();
 
-  // 부족하면 같은 대학 다른 카테고리에서 보충
-  if (related.length < limit) {
-    const more = allPosts
-      .filter(p => p.id !== postId && p.status === 'active' && p.universityId === post.universityId && !related.some(r => r.id === p.id))
-      .slice(0, limit - related.length);
-    related.push(...more);
-  }
+  // Tier 1: 같은 소분류 (가장 관련성 높음)
+  const sameMinor = active
+    .filter(p => p.categoryMinorId === post.categoryMinorId)
+    .sort(byRecent);
 
+  // Tier 2: 같은 대분류, 다른 소분류
+  const sameMajor = active
+    .filter(p => p.categoryMajorId === post.categoryMajorId && p.categoryMinorId !== post.categoryMinorId)
+    .sort(byRecent);
+
+  // Tier 3: 같은 대학, 다른 카테고리
+  const sameUni = active
+    .filter(p => p.categoryMajorId !== post.categoryMajorId)
+    .sort(byRecent);
+
+  const related = [...sameMinor, ...sameMajor, ...sameUni].slice(0, limit);
   return related.map(toPostListItem);
 }
 
@@ -200,6 +207,7 @@ export function updatePost(postId: string, input: {
   priceNegotiable: boolean;
   locationDetail: string | null;
   tags?: string[];
+  status?: PostStatus;
 }): void {
   const now = new Date().toISOString();
   // localStorage 게시글: 직접 수정
@@ -247,6 +255,7 @@ export function deletePost(postId: string): void {
 export function createPost(input: {
   title: string;
   body: string;
+  authorId: string;
   universityId: number;
   categoryMajorId: number;
   categoryMinorId: number;
@@ -260,7 +269,7 @@ export function createPost(input: {
     id: `local-${Date.now()}`,
     title: input.title,
     body: input.body,
-    authorId: 'u1', // Phase A: 하드코딩 사용자
+    authorId: input.authorId,
     universityId: input.universityId,
     categoryMajorId: input.categoryMajorId,
     categoryMinorId: input.categoryMinorId,
@@ -323,14 +332,14 @@ function getLocalChatRooms(): ChatRoom[] {
 function getChatOverrides(): Record<string, Partial<ChatRoom>> {
   if (typeof window === 'undefined') return {};
   try {
-    const saved = localStorage.getItem('campulist_chat_overrides');
+    const saved = localStorage.getItem(STORAGE_KEYS.CHAT_OVERRIDES);
     return saved ? JSON.parse(saved) : {};
   } catch { return {}; }
 }
 
 function saveChatOverrides(overrides: Record<string, Partial<ChatRoom>>): void {
   try {
-    localStorage.setItem('campulist_chat_overrides', JSON.stringify(overrides));
+    localStorage.setItem(STORAGE_KEYS.CHAT_OVERRIDES, JSON.stringify(overrides));
   } catch { /* storage full */ }
 }
 
@@ -406,6 +415,31 @@ export function getUnreadNotificationCount(): number {
     const mockUnread = ['n1', 'n2']; // mock에서 isRead: false인 알림 ID
     return mockUnread.filter(id => !readIds.includes(id)).length;
   } catch { return 0; }
+}
+
+// 클라이언트 전용: 필터링된 로컬 게시글 (Server Component에서는 빈 배열 반환)
+export function getFilteredLocalPosts(filters?: {
+  universityId?: number;
+  categoryMajorId?: number;
+  categoryMinorId?: number;
+  query?: string;
+  authorId?: string;
+  priceMin?: number;
+  priceMax?: number;
+}): PostListItem[] {
+  // getAllPosts에서 로컬 게시글 + 오버라이드 적용된 것만 추출
+  let posts = getAllPosts().filter(p => p.id.startsWith('local-') && p.status === 'active');
+  if (filters?.universityId) posts = posts.filter(p => p.universityId === filters.universityId);
+  if (filters?.categoryMajorId) posts = posts.filter(p => p.categoryMajorId === filters.categoryMajorId);
+  if (filters?.categoryMinorId) posts = posts.filter(p => p.categoryMinorId === filters.categoryMinorId);
+  if (filters?.query) {
+    const q = filters.query.toLowerCase();
+    posts = posts.filter(p => p.title.toLowerCase().includes(q) || p.body.toLowerCase().includes(q));
+  }
+  if (filters?.authorId) posts = posts.filter(p => p.authorId === filters.authorId);
+  if (filters?.priceMin !== undefined) posts = posts.filter(p => p.price !== null && p.price >= filters.priceMin!);
+  if (filters?.priceMax !== undefined) posts = posts.filter(p => p.price !== null && p.price <= filters.priceMax!);
+  return posts.map(toPostListItem);
 }
 
 // 조회수 증가 (세션당 1회만)

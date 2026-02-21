@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { getPosts } from '@/lib/api';
-import PostCard from '@/components/post/PostCard';
+import PostFeedWithLocal from '@/components/post/PostFeedWithLocal';
 import EmptyState from '@/components/ui/EmptyState';
 import RecentSearches from '@/components/search/RecentSearches';
 import PriceFilter from '@/components/search/PriceFilter';
@@ -13,10 +13,10 @@ interface Props {
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
   const { q } = await searchParams;
   const query = q?.trim();
-  if (!query) return { title: '검색 | 캠푸리스트' };
+  if (!query) return { title: '검색 | 캠퍼스리스트' };
   return {
-    title: `"${query}" 검색 결과 | 캠푸리스트`,
-    description: `캠푸리스트에서 "${query}" 검색 결과`,
+    title: `"${query}" 검색 결과 | 캠퍼스리스트`,
+    description: `캠퍼스리스트에서 "${query}" 검색 결과`,
   };
 }
 
@@ -86,11 +86,14 @@ export default async function SearchPage({ searchParams }: Props) {
       <RecentSearches currentQuery={query || undefined} />
       <div>
         {query ? (
-          posts.length > 0 ? (
-            posts.map(post => <PostCard key={post.id} post={post} />)
-          ) : (
-            <EmptyState message={`\u201C${query}\u201D에 대한 검색 결과가 없습니다.`} sub="다른 검색어로 시도해보세요." />
-          )
+          <PostFeedWithLocal
+            serverPosts={posts}
+            query={query}
+            sortBy={sortBy}
+            priceMin={priceMin}
+            priceMax={priceMax}
+            emptyState={<EmptyState message={`\u201C${query}\u201D에 대한 검색 결과가 없습니다.`} sub="다른 검색어로 시도해보세요." />}
+          />
         ) : (
           <div className="px-4 py-16 text-center text-muted-foreground">
             <svg className="mx-auto mb-4" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>

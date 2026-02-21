@@ -3,6 +3,8 @@ import { getPosts } from '@/lib/api';
 import UniversityTabs from '@/components/post/UniversityTabs';
 import CategoryGrid from '@/components/post/CategoryGrid';
 import PostCard from '@/components/post/PostCard';
+import PopularPostsSection from '@/components/post/PopularPostsSection';
+import PostFeedWithLocal from '@/components/post/PostFeedWithLocal';
 import { Separator } from '@/components/ui/separator';
 import { mockPosts } from '@/data/posts';
 import { categories } from '@/data/categories';
@@ -29,19 +31,8 @@ export default async function HomePage() {
 
       <Separator />
 
-      {/* 실시간 인기글 */}
-      <section>
-        <div className="flex items-center justify-between px-4 py-3">
-          <h2 className="text-lg font-bold">실시간 인기글</h2>
-          <span className="text-sm text-muted-foreground">TOP {popularPosts.length}</span>
-        </div>
-
-        <div>
-          {popularPosts.map(post => (
-            <PostCard key={post.id} post={post} />
-          ))}
-        </div>
-      </section>
+      {/* 실시간 인기글 (접기/펴기) */}
+      <PopularPostsSection posts={popularPosts} />
 
       <Separator />
 
@@ -86,11 +77,7 @@ export default async function HomePage() {
           <span className="text-sm text-muted-foreground">총 {latestPosts.length}건</span>
         </div>
 
-        <div>
-          {latestPosts.map(post => (
-            <PostCard key={post.id} post={post} />
-          ))}
-        </div>
+        <PostFeedWithLocal serverPosts={latestPosts} />
       </section>
     </div>
   );

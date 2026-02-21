@@ -2,20 +2,31 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import EmptyState from '@/components/ui/EmptyState';
 import { getMyPosts, getPostsByIds, getRecentViewedPosts } from '@/lib/api';
 import { formatPrice, formatRelativeTime } from '@/lib/format';
-import type { PostListItem } from '@/lib/types';
+import type { PostListItem, MemberType } from '@/lib/types';
 import { STORAGE_KEYS } from '@/lib/constants';
 import { useToast } from '@/components/ui/Toast';
-import { mockUsers } from '@/data/users';
+import { useAuth } from '@/contexts/AuthContext';
+import AuthGuard from '@/components/auth/AuthGuard';
 import { universities } from '@/data/universities';
-import { CURRENT_USER_ID } from '@/data/chats';
 
 type Tab = 'selling' | 'likes' | 'recent' | 'reviews';
+
+const MEMBER_TYPE_LABELS: Record<MemberType, string> = {
+  undergraduate: '🎓 학부생',
+  graduate: '📚 대학원생',
+  professor: '👨‍🏫 교수',
+  staff: '🏢 교직원',
+  alumni: '🎒 졸업생',
+  merchant: '🏪 인근상인',
+  general: '👤 일반인',
+};
 
 function getLikedPostIds(): string[] {
   try {
@@ -25,36 +36,30 @@ function getLikedPostIds(): string[] {
   }
 }
 
-export default function MyPage() {
+function MyPageContent() {
+  const router = useRouter();
   const { toast } = useToast();
+  const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>('selling');
   const [myPosts, setMyPosts] = useState<PostListItem[]>([]);
   const [likedPosts, setLikedPosts] = useState<PostListItem[]>([]);
   const [recentPosts, setRecentPosts] = useState<PostListItem[]>([]);
 
   useEffect(() => {
-    document.title = '마이페이지 | 캠푸리스트';
-    setMyPosts(getMyPosts(CURRENT_USER_ID));
+    document.title = '마이페이지 | 캠퍼스리스트';
+    if (user) {
+      setMyPosts(getMyPosts(user.id));
+    }
     const ids = getLikedPostIds();
     if (ids.length > 0) {
       setLikedPosts(getPostsByIds(ids));
     }
     setRecentPosts(getRecentViewedPosts());
-  }, []);
+  }, [user]);
 
-  // mockUsers에서 현재 사용자 데이터 가져오기
-  const user = mockUsers.find(u => u.id === CURRENT_USER_ID)!;
+  if (!user) return null;
+
   const university = universities.find(u => u.id === user.universityId);
-  const currentUser = {
-    id: user.id,
-    nickname: user.nickname,
-    email: user.email,
-    university: university?.name ?? '',
-    department: user.department ?? '',
-    isVerified: user.isVerified,
-    mannerTemp: user.mannerTemp,
-    tradeCount: user.tradeCount,
-  };
 
   // Mock 후기 데이터
   const mockReviews = [
@@ -76,35 +81,45 @@ export default function MyPage() {
       <div className="px-4 py-6">
         <div className="flex items-center gap-4">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-500/10 text-2xl font-bold text-blue-500">
-            {currentUser.nickname.charAt(0)}
+            {user.nickname.charAt(0)}
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold">{currentUser.nickname}</h1>
-              {currentUser.isVerified && (
+              <h1 className="text-xl font-bold">{user.nickname}</h1>
+              {user.isVerified && (
                 <Badge variant="secondary" className="gap-0.5 text-[10px] text-blue-500">
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" /></svg>
                   인증됨
                 </Badge>
               )}
             </div>
-            <p className="text-sm text-muted-foreground">{currentUser.university} · {currentUser.department}</p>
-            <p className="text-sm text-muted-foreground">{currentUser.email}</p>
+            <p className="text-sm text-muted-foreground">
+              {university?.name ?? ''} · {MEMBER_TYPE_LABELS[user.memberType]}{user.department ? ` · ${user.department}` : ''}
+            </p>
+            <p className="text-sm text-muted-foreground">{user.email}</p>
           </div>
-          <Link href={`/user/${CURRENT_USER_ID}`}>
-            <Button variant="outline" size="sm">프로필</Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={logout}
+              className="rounded-lg px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+            >
+              로그아웃
+            </button>
+            <Link href={`/user/${user.id}`}>
+              <Button variant="outline" size="sm">프로필</Button>
+            </Link>
+          </div>
         </div>
 
         {/* 매너온도 + 거래 통계 */}
         <div className="mt-4 flex gap-4 rounded-lg bg-muted px-4 py-3">
           <div className="flex-1 text-center">
-            <p className="text-2xl font-bold text-blue-500">{currentUser.mannerTemp}°</p>
+            <p className="text-2xl font-bold text-blue-500">{user.mannerTemp}°</p>
             <p className="text-xs text-muted-foreground">매너온도</p>
           </div>
           <Separator orientation="vertical" className="h-auto" />
           <div className="flex-1 text-center">
-            <p className="text-2xl font-bold">{currentUser.tradeCount}</p>
+            <p className="text-2xl font-bold">{user.tradeCount}</p>
             <p className="text-xs text-muted-foreground">거래 횟수</p>
           </div>
         </div>
@@ -155,9 +170,21 @@ export default function MyPage() {
                   <p className="mt-0.5 text-sm font-bold">
                     {post.price !== null ? formatPrice(post.price) : '가격 미정'}
                   </p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">
-                    {formatRelativeTime(post.createdAt)} · 조회 {post.viewCount} · 찜 {post.likeCount}
-                  </p>
+                  <div className="mt-0.5 flex items-center justify-between">
+                    <p className="text-xs text-muted-foreground">
+                      {formatRelativeTime(post.createdAt)} · 조회 {post.viewCount} · 찜 {post.likeCount}
+                    </p>
+                    <button
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); router.push(`/write?edit=${post.id}`); }}
+                      className="flex items-center gap-1.5 rounded-lg border border-blue-500/40 bg-blue-500/10 px-3 py-1.5 text-xs font-semibold text-blue-600 transition-colors hover:bg-blue-500/20"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                      </svg>
+                      수정
+                    </button>
+                  </div>
                 </div>
               </Link>
             ))
@@ -272,18 +299,14 @@ export default function MyPage() {
         ))}
       </div>
 
-      <Separator />
-
-      {/* 로그아웃 */}
-      <div className="px-4 py-4">
-        <Button
-          variant="ghost"
-          className="w-full text-muted-foreground hover:text-destructive"
-          onClick={() => toast('로그아웃 되었습니다')}
-        >
-          로그아웃
-        </Button>
-      </div>
     </div>
+  );
+}
+
+export default function MyPage() {
+  return (
+    <AuthGuard>
+      <MyPageContent />
+    </AuthGuard>
   );
 }

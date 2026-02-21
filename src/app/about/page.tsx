@@ -4,7 +4,8 @@ import { Separator } from '@/components/ui/separator';
 export default function AboutPage() {
   return (
     <div className="px-4 py-6">
-      <h1 className="text-2xl font-bold">캠푸리스트</h1>
+      <h1 className="text-2xl font-bold">캠퍼스리스트</h1>
+      <p className="text-xs text-muted-foreground">Campu(s)+list+.com = Campulist.com</p>
       <p className="mt-1 text-muted-foreground">대학생을 위한 캠퍼스 생활 플랫폼</p>
 
       <Separator className="my-6" />
@@ -13,7 +14,7 @@ export default function AboutPage() {
         <div>
           <h2 className="text-lg font-bold">서비스 소개</h2>
           <p className="mt-2 text-sm leading-relaxed text-foreground/80">
-            캠푸리스트(Campulist)는 대학교 재학생, 교직원, 캠퍼스 주변 상인을 위한 로컬 커뮤니티 플랫폼입니다.
+            캠퍼스리스트(Campulist)는 대학교 재학생, 교직원, 캠퍼스 주변 상인을 위한 로컬 커뮤니티 플랫폼입니다.
             중고거래, 주거, 일자리, 커뮤니티, 서비스, 캠퍼스 비즈니스까지 — 대학 생활에 필요한 모든 것을 한 곳에서 해결하세요.
           </p>
         </div>

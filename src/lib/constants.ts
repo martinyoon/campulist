@@ -1,5 +1,5 @@
 // ============================================================
-// 캠푸리스트 — 상수 정의
+// 캠퍼스리스트 — 상수 정의
 // localStorage 키, 기본값 등 매직 스트링 중앙 관리
 // ============================================================
 
@@ -15,6 +15,9 @@ export const STORAGE_KEYS = {
   NOTIFICATION_READ: 'campulist_notification_read',
   REPORTS: 'campulist_reports',
   POST_TAGS: 'campulist_post_tags',
+  CURRENT_USER: 'campulist_current_user',
+  REGISTERED_USERS: 'campulist_registered_users',
+  CHAT_OVERRIDES: 'campulist_chat_overrides',
 } as const;
 
 export const LIMITS = {

@@ -1,5 +1,5 @@
 // ============================================================
-// 캠푸리스트 (Campulist) — TypeScript 타입 정의
+// 캠퍼스리스트 (Campulist) — TypeScript 타입 정의
 // ============================================================
 
 export type UserRole = 'user' | 'business' | 'admin';
@@ -8,6 +8,7 @@ export type NotificationType = 'chat' | 'like' | 'keyword' | 'review' | 'system'
 export type BizPlan = 'basic' | 'pro' | 'premium';
 export type ReportReason = 'spam' | 'fraud' | 'inappropriate' | 'duplicate' | 'other';
 export type ReportStatus = 'pending' | 'reviewed' | 'resolved' | 'dismissed';
+export type MemberType = 'undergraduate' | 'graduate' | 'professor' | 'staff' | 'alumni' | 'merchant' | 'general';
 
 export interface University {
   id: number;
@@ -26,6 +27,7 @@ export interface User {
   nickname: string;
   avatarUrl: string | null;
   role: UserRole;
+  memberType: MemberType;
   universityId: number;
   department: string | null;
   isVerified: boolean;

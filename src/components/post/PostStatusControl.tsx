@@ -3,9 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/ui/Toast';
-import { updatePostStatus, deletePost } from '@/lib/api';
-import { CURRENT_USER_ID } from '@/data/chats';
-import { STORAGE_KEYS } from '@/lib/constants';
+import { deletePost } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 import type { PostStatus } from '@/lib/types';
 
 interface PostStatusControlProps {
@@ -14,39 +13,17 @@ interface PostStatusControlProps {
   initialStatus: PostStatus;
 }
 
-const STATUS_OPTIONS: { value: PostStatus; label: string }[] = [
-  { value: 'active', label: '판매중' },
-  { value: 'reserved', label: '예약중' },
-  { value: 'completed', label: '거래완료' },
-];
-
-export default function PostStatusControl({ postId, authorId, initialStatus }: PostStatusControlProps) {
+export default function PostStatusControl({ postId, authorId }: PostStatusControlProps) {
   const router = useRouter();
   const { toast } = useToast();
-  const [status, setStatus] = useState<PostStatus>(initialStatus);
+  const { user } = useAuth();
   const [isOwner, setIsOwner] = useState(false);
 
   useEffect(() => {
-    setIsOwner(authorId === CURRENT_USER_ID);
-    // localStorage에서 최신 오버라이드 읽기
-    try {
-      const saved = localStorage.getItem(STORAGE_KEYS.POST_OVERRIDES);
-      const overrides = saved ? JSON.parse(saved) : {};
-      if (overrides[postId]?.status) {
-        setStatus(overrides[postId].status);
-      }
-    } catch { /* ignore */ }
-  }, [authorId, postId]);
+    setIsOwner(!!user && authorId === user.id);
+  }, [user, authorId]);
 
   if (!isOwner) return null;
-
-  const handleStatusChange = (newStatus: PostStatus) => {
-    if (newStatus === status) return;
-    updatePostStatus(postId, newStatus);
-    setStatus(newStatus);
-    const label = STATUS_OPTIONS.find(s => s.value === newStatus)?.label;
-    toast(`${label}(으)로 변경되었습니다`);
-  };
 
   const handleEdit = () => {
     router.push(`/write?edit=${postId}`);
@@ -60,36 +37,28 @@ export default function PostStatusControl({ postId, authorId, initialStatus }: P
   };
 
   return (
-    <div className="border-b border-border px-4 py-3">
-      <div className="flex items-center justify-between">
-        <p className="text-sm font-medium text-muted-foreground">거래 상태 변경</p>
-        <div className="flex gap-3">
-          <button onClick={handleEdit} className="text-sm text-muted-foreground hover:text-blue-500">
-            수정
-          </button>
-          <button onClick={handleDelete} className="text-sm text-muted-foreground hover:text-red-500">
-            삭제
-          </button>
-        </div>
-      </div>
-      <div className="mt-2 flex gap-2">
-        {STATUS_OPTIONS.map(opt => (
-          <button
-            key={opt.value}
-            onClick={() => handleStatusChange(opt.value)}
-            className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${
-              status === opt.value
-                ? opt.value === 'active'
-                  ? 'border-blue-500 bg-blue-500/10 text-blue-500'
-                  : opt.value === 'reserved'
-                    ? 'border-orange-500 bg-orange-500/10 text-orange-500'
-                    : 'border-green-500 bg-green-500/10 text-green-500'
-                : 'border-border text-muted-foreground hover:bg-muted'
-            }`}
-          >
-            {opt.label}
-          </button>
-        ))}
+    <div className="border-b border-border px-4 py-4">
+      <div className="flex gap-2">
+        <button
+          onClick={handleEdit}
+          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-blue-500/30 bg-blue-500/5 px-4 py-2.5 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-500/15"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+          </svg>
+          수정하기
+        </button>
+        <button
+          onClick={handleDelete}
+          className="flex items-center justify-center gap-1.5 rounded-lg border border-red-500/30 bg-red-500/5 px-4 py-2.5 text-sm font-medium text-red-500 transition-colors hover:bg-red-500/15"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="3 6 5 6 21 6" />
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+          </svg>
+          삭제
+        </button>
       </div>
     </div>
   );
