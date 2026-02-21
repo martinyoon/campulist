@@ -2,12 +2,12 @@ import type { Category, CategoryGroup } from '@/lib/types';
 
 export const categories: Category[] = [
   // 대분류
-  { id: 1, name: '마켓', slug: 'market', parentId: null, icon: '📦', sortOrder: 1 },
-  { id: 2, name: '주거', slug: 'housing', parentId: null, icon: '🏠', sortOrder: 2 },
-  { id: 3, name: '일자리', slug: 'jobs', parentId: null, icon: '💼', sortOrder: 3 },
-  { id: 4, name: '커뮤니티', slug: 'community', parentId: null, icon: '👥', sortOrder: 4 },
-  { id: 5, name: '서비스', slug: 'services', parentId: null, icon: '🔧', sortOrder: 5 },
-  { id: 6, name: '캠퍼스 비즈니스', slug: 'business', parentId: null, icon: '🏪', sortOrder: 6 },
+  { id: 1, name: '중고거래/나눔', slug: 'market', parentId: null, icon: '📦', sortOrder: 1 },
+  { id: 2, name: '방찾기/양도', slug: 'housing', parentId: null, icon: '🏠', sortOrder: 2 },
+  { id: 3, name: '알바/과외/취업', slug: 'jobs', parentId: null, icon: '💼', sortOrder: 3 },
+  { id: 4, name: '스터디/모임/게시판', slug: 'community', parentId: null, icon: '👥', sortOrder: 4 },
+  { id: 5, name: '이사/수리/대행', slug: 'services', parentId: null, icon: '🔧', sortOrder: 5 },
+  { id: 6, name: '맛집/할인/이벤트', slug: 'business', parentId: null, icon: '🏪', sortOrder: 6 },
 
   // 마켓 소분류
   { id: 11, name: '중고교재', slug: 'textbooks', parentId: 1, icon: '📚', sortOrder: 1 },
@@ -27,11 +27,13 @@ export const categories: Category[] = [
 
   // 일자리 소분류
   { id: 31, name: '아르바이트', slug: 'part-time', parentId: 3, icon: '⏰', sortOrder: 1 },
-  { id: 32, name: '과외/튜터링', slug: 'tutoring', parentId: 3, icon: '📝', sortOrder: 2 },
-  { id: 33, name: '인턴/취업', slug: 'intern', parentId: 3, icon: '🏢', sortOrder: 3 },
-  { id: 34, name: '연구보조(RA/TA)', slug: 'research', parentId: 3, icon: '🔬', sortOrder: 4 },
-  { id: 35, name: '프리랜서', slug: 'freelance', parentId: 3, icon: '💡', sortOrder: 5 },
-  { id: 36, name: '구직', slug: 'job-seeking', parentId: 3, icon: '🙋', sortOrder: 6 },
+  { id: 32, name: '과외', slug: 'tutoring', parentId: 3, icon: '📝', sortOrder: 2 },
+  { id: 53, name: '레슨', slug: 'lesson', parentId: 3, icon: '🎵', sortOrder: 3 },
+  { id: 33, name: '인턴', slug: 'intern', parentId: 3, icon: '🏢', sortOrder: 4 },
+  { id: 34, name: '연구보조(RA/TA)', slug: 'research', parentId: 3, icon: '🔬', sortOrder: 5 },
+  { id: 35, name: '프리랜서', slug: 'freelance', parentId: 3, icon: '💡', sortOrder: 6 },
+  { id: 37, name: '구인', slug: 'hiring', parentId: 3, icon: '📢', sortOrder: 7 },
+  { id: 36, name: '구직', slug: 'job-seeking', parentId: 3, icon: '🙋', sortOrder: 8 },
 
   // 커뮤니티 소분류
   { id: 41, name: '스터디/팀원', slug: 'study', parentId: 4, icon: '📖', sortOrder: 1 },
@@ -44,9 +46,8 @@ export const categories: Category[] = [
   // 서비스 소분류
   { id: 51, name: '이사/운송', slug: 'moving', parentId: 5, icon: '🚛', sortOrder: 1 },
   { id: 52, name: '수리/설치', slug: 'repair', parentId: 5, icon: '🔨', sortOrder: 2 },
-  { id: 53, name: '레슨', slug: 'lesson', parentId: 5, icon: '🎵', sortOrder: 3 },
-  { id: 54, name: '대행', slug: 'agency', parentId: 5, icon: '🏃', sortOrder: 4 },
-  { id: 55, name: '기타 서비스', slug: 'etc-service', parentId: 5, icon: '✨', sortOrder: 5 },
+  { id: 54, name: '대행', slug: 'agency', parentId: 5, icon: '🏃', sortOrder: 3 },
+  { id: 55, name: '기타 서비스', slug: 'etc-service', parentId: 5, icon: '✨', sortOrder: 4 },
 
   // 캠퍼스 비즈니스 소분류
   { id: 61, name: '맛집/카페', slug: 'restaurant', parentId: 6, icon: '🍽️', sortOrder: 1 },

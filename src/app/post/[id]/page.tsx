@@ -87,7 +87,7 @@ export default async function PostDetailPage({ params }: Props) {
             {post.categoryMajor.icon} {post.categoryMajor.name}
           </Link>
           <span>›</span>
-          <span className="text-foreground/70">{post.categoryMinor.name}</span>
+          <Link href={`/${post.university.slug}/${post.categoryMajor.slug}?minor=${post.categoryMinor.slug}`} className="hover:text-blue-500">{post.categoryMinor.name}</Link>
         </nav>
 
         <div className="mt-2 flex items-center gap-2">

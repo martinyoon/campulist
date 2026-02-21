@@ -1,6 +1,6 @@
 'use client';
 
-import { majorCategories } from '@/data/categories';
+import { majorCategories, getMinorCategories } from '@/data/categories';
 import { Button } from '@/components/ui/button';
 
 interface Props {
@@ -36,7 +36,14 @@ export default function CategoryStepMajor({ selectedMajorId, onSelect, onContinu
               className="accent-blue-500"
             />
             <span className="text-xl">{cat.icon}</span>
-            <span className="text-sm font-medium">{cat.name}</span>
+            <div className="flex-1">
+              <span className="text-sm font-medium">{cat.name}</span>
+              <div className="mt-1 flex flex-wrap gap-1">
+                {getMinorCategories(cat.id).map(m => (
+                  <span key={m.id} className="rounded bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground">{m.name}</span>
+                ))}
+              </div>
+            </div>
           </label>
         ))}
       </div>
