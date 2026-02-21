@@ -52,9 +52,9 @@ export default function Header() {
               <div className="my-2 border-t border-border" />
               <p className="text-sm font-semibold text-muted-foreground">카테고리</p>
               {majorCategories.map(cat => {
-                const uniSlug = universities.find(u => pathname.startsWith(`/${u.slug}`))?.slug || universities[0]?.slug || 'snu';
+                const uniSlug = universities.find(u => pathname.startsWith(`/${u.slug}`))?.slug;
                 return (
-                  <Link key={cat.slug} href={`/${uniSlug}/${cat.slug}`} className="text-base hover:text-blue-500">
+                  <Link key={cat.slug} href={uniSlug ? `/${uniSlug}/${cat.slug}` : `/all/${cat.slug}`} className="text-base hover:text-blue-500">
                     {cat.icon} {cat.name}
                   </Link>
                 );
@@ -95,7 +95,7 @@ export default function Header() {
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
                 </Button>
                 {hasUnreadNotif && (
-                  <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500" />
+                  <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">!</span>
                 )}
               </Link>
               <Link href="/my">

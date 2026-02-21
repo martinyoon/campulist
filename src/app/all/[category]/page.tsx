@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { getPosts, getUniversityBySlug } from '@/lib/api';
+import { getPosts } from '@/lib/api';
 import { getCategoryBySlug, getMinorCategories } from '@/data/categories';
 import UniversityTabs from '@/components/post/UniversityTabs';
 import PostFeedWithLocal from '@/components/post/PostFeedWithLocal';
@@ -9,33 +9,30 @@ import EmptyState from '@/components/ui/EmptyState';
 import { Badge } from '@/components/ui/badge';
 
 interface Props {
-  params: Promise<{ university: string; category: string }>;
+  params: Promise<{ category: string }>;
   searchParams: Promise<{ minor?: string; sort?: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { university: uniSlug, category: catSlug } = await params;
-  const university = await getUniversityBySlug(uniSlug);
+  const { category: catSlug } = await params;
   const category = getCategoryBySlug(catSlug);
-  if (!university || !category) return { title: '캠퍼스리스트' };
+  if (!category) return { title: '캠퍼스리스트' };
   return {
-    title: `${category.icon} ${category.name} | ${university.name} | 캠퍼스리스트`,
-    description: `${university.name} ${category.name} 게시글 목록 - 캠퍼스리스트`,
+    title: `${category.icon} ${category.name} | 모든 대학 | 캠퍼스리스트`,
+    description: `모든 대학 ${category.name} 게시글 목록 - 캠퍼스리스트`,
   };
 }
 
-export default async function CategoryPage({ params, searchParams }: Props) {
-  const { university: uniSlug, category: catSlug } = await params;
+export default async function AllCategoryPage({ params, searchParams }: Props) {
+  const { category: catSlug } = await params;
   const { minor: minorSlug, sort } = await searchParams;
   const sortBy = (sort as 'latest' | 'price_asc' | 'price_desc' | 'popular') || 'latest';
 
-  const university = await getUniversityBySlug(uniSlug);
   const category = getCategoryBySlug(catSlug);
-  if (!university || !category || category.parentId !== null) notFound();
+  if (!category || category.parentId !== null) notFound();
 
   const minors = getMinorCategories(category.id);
   const posts = await getPosts({
-    universitySlug: uniSlug,
     categoryMajorSlug: catSlug,
     categoryMinorSlug: minorSlug || undefined,
     sortBy,
@@ -50,7 +47,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   ];
 
   const buildUrl = (params: { minor?: string; sort?: string }) => {
-    const base = `/${uniSlug}/${catSlug}`;
+    const base = `/all/${catSlug}`;
     const sp = new URLSearchParams();
     const m = params.minor ?? minorSlug;
     const s = params.sort ?? sort;
@@ -67,8 +64,8 @@ export default async function CategoryPage({ params, searchParams }: Props) {
       {/* 카테고리 헤더 */}
       <div className="border-b border-border px-4 py-4">
         <div className="flex items-center gap-2">
-          <Link href={`/${uniSlug}`} className="text-sm text-muted-foreground hover:text-foreground">
-            {university.name}
+          <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">
+            모든 대학
           </Link>
           <span className="text-sm text-muted-foreground/50">/</span>
           <span className="text-sm font-medium">{category.icon} {category.name}</span>
@@ -118,7 +115,6 @@ export default async function CategoryPage({ params, searchParams }: Props) {
       {/* 게시글 목록 */}
       <PostFeedWithLocal
         serverPosts={posts}
-        universityId={university.id}
         categoryMajorId={category.id}
         categoryMinorId={minorSlug ? minors.find(m => m.slug === minorSlug)?.id : undefined}
         sortBy={sortBy}

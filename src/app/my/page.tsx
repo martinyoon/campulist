@@ -152,7 +152,7 @@ function MyPageContent() {
             myPosts.map(post => (
               <Link key={post.id} href={`/post/${post.id}`} className="flex gap-3 border-b border-border px-4 py-3 transition-colors hover:bg-muted/50">
                 {post.thumbnail ? (
-                  <img src={post.thumbnail} alt="" className="h-20 w-20 shrink-0 rounded-lg object-cover" />
+                  <img src={post.thumbnail} alt="" className="h-24 w-24 shrink-0 rounded-xl object-cover" />
                 ) : (
                   <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-lg bg-muted text-2xl text-muted-foreground">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="m21 15-5-5L5 21" /></svg>
@@ -199,7 +199,7 @@ function MyPageContent() {
             likedPosts.map(post => (
               <Link key={post.id} href={`/post/${post.id}`} className="flex gap-3 border-b border-border px-4 py-3 transition-colors hover:bg-muted/50">
                 {post.thumbnail ? (
-                  <img src={post.thumbnail} alt="" className="h-20 w-20 shrink-0 rounded-lg object-cover" />
+                  <img src={post.thumbnail} alt="" className="h-24 w-24 shrink-0 rounded-xl object-cover" />
                 ) : (
                   <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="m21 15-5-5L5 21" /></svg>
@@ -227,7 +227,7 @@ function MyPageContent() {
             recentPosts.map(post => (
               <Link key={post.id} href={`/post/${post.id}`} className="flex gap-3 border-b border-border px-4 py-3 transition-colors hover:bg-muted/50">
                 {post.thumbnail ? (
-                  <img src={post.thumbnail} alt="" className="h-20 w-20 shrink-0 rounded-lg object-cover" />
+                  <img src={post.thumbnail} alt="" className="h-24 w-24 shrink-0 rounded-xl object-cover" />
                 ) : (
                   <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="m21 15-5-5L5 21" /></svg>

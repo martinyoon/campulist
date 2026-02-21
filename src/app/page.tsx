@@ -36,27 +36,27 @@ export default async function HomePage() {
 
       <Separator />
 
-      {/* 캠퍼스 비즈니스 */}
+      {/* 맛집/할인/이벤트 */}
       {bizPosts.length > 0 && (
         <>
           <section>
-            <div className="flex items-center justify-between px-4 py-3">
-              <h2 className="text-lg font-bold">🏪 캠퍼스 비즈니스</h2>
+            <div className="flex items-center justify-between px-4 py-4">
+              <h2 className="text-xl font-bold">🏪 맛집/할인/이벤트</h2>
               <Link href={bizMoreHref} className="text-sm text-blue-500 hover:text-blue-600">더보기</Link>
             </div>
-            <div className="flex gap-3 overflow-x-auto px-4 pb-3">
+            <div className="flex gap-3 overflow-x-auto px-4 pb-4">
               {bizPosts.map(bp => {
                 const minor = categories.find(c => c.id === bp.categoryMinorId);
                 return (
                   <Link
                     key={bp.id}
                     href={`/post/${bp.id}`}
-                    className="w-56 shrink-0 rounded-xl border border-border p-3 transition-colors hover:bg-muted"
+                    className="w-60 shrink-0 rounded-xl border border-border p-3.5 transition-colors hover:bg-muted"
                   >
-                    <span className="text-xs text-blue-500">{minor?.name || '비즈니스'}</span>
-                    <h3 className="mt-1 truncate text-sm font-medium">{bp.title}</h3>
-                    <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{bp.body}</p>
-                    <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
+                    <span className="text-sm text-blue-500">{minor?.name || '맛집/할인/이벤트'}</span>
+                    <h3 className="mt-1 truncate text-[15px] font-medium">{bp.title}</h3>
+                    <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{bp.body}</p>
+                    <div className="mt-2 flex items-center gap-1 text-[13px] text-muted-foreground">
                       <span>❤️ {bp.likeCount}</span>
                       <span>· 조회 {bp.viewCount}</span>
                     </div>
@@ -70,10 +70,10 @@ export default async function HomePage() {
         </>
       )}
 
-      {/* 전체 최신글 */}
+      {/* 최신 게시글 */}
       <section>
-        <div className="flex items-center justify-between px-4 py-3">
-          <h2 className="text-lg font-bold">전체 최신글</h2>
+        <div className="flex items-center justify-between px-4 py-4">
+          <h2 className="text-xl font-bold">최신 게시글</h2>
           <span className="text-sm text-muted-foreground">총 {latestPosts.length}건</span>
         </div>
 

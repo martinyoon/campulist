@@ -15,7 +15,7 @@ export default function AboutPage() {
           <h2 className="text-lg font-bold">서비스 소개</h2>
           <p className="mt-2 text-sm leading-relaxed text-foreground/80">
             캠퍼스리스트(Campulist)는 대학교 재학생, 교직원, 캠퍼스 주변 상인을 위한 로컬 커뮤니티 플랫폼입니다.
-            중고거래, 주거, 일자리, 커뮤니티, 서비스, 캠퍼스 비즈니스까지 — 대학 생활에 필요한 모든 것을 한 곳에서 해결하세요.
+            중고거래/나눔, 방찾기/양도, 알바/과외/취업, 스터디/모임/게시판, 이사/수리/대행, 맛집/할인/이벤트까지 — 대학 생활에 필요한 모든 것을 한 곳에서 해결하세요.
           </p>
         </div>
 

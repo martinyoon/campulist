@@ -51,7 +51,7 @@ export default async function PostDetailPage({ params }: Props) {
   }
 
   return (
-    <div className="pb-24">
+    <div className="pb-32 md:pb-4">
       {/* 이미지 갤러리 */}
       <ImageGallery images={post.images} title={post.title} />
 

@@ -23,7 +23,7 @@ export default function PostCard({ post }: PostCardProps) {
   };
 
   return (
-    <Link href={`/post/${post.id}`} className="flex gap-4 border-b border-border px-4 py-4 transition-colors hover:bg-muted/50">
+    <Link href={`/post/${post.id}`} className="flex gap-4 border-b border-border px-4 py-5 transition-colors hover:bg-muted/50">
       {/* 썸네일 */}
       {post.thumbnail ? (
         <div className="h-28 w-28 shrink-0 overflow-hidden rounded-xl bg-muted">
@@ -49,7 +49,7 @@ export default function PostCard({ post }: PostCardProps) {
           )}
           <h3 className="truncate text-base font-medium text-foreground">{post.title}</h3>
         </div>
-        <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">
+        <p className="mt-0.5 text-sm text-muted-foreground line-clamp-2">
           {post.bodySnippet}
         </p>
         <p className="mt-1 text-lg font-bold text-foreground">
@@ -57,7 +57,7 @@ export default function PostCard({ post }: PostCardProps) {
           {post.priceNegotiable && <span className="ml-1 text-sm font-normal text-muted-foreground">협의가능</span>}
         </p>
 
-        <div className="mt-auto flex items-center gap-2 text-xs text-muted-foreground">
+        <div className="mt-auto flex items-center gap-1.5 text-[13px] text-muted-foreground">
           {post.author.isVerified && (
             <Badge variant="secondary" className="h-5 gap-0.5 px-1.5 text-[10px] text-blue-500">
               <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" /></svg>

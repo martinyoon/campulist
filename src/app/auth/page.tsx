@@ -124,7 +124,7 @@ export default function AuthPage() {
               {/* 회원 유형 */}
               <div>
                 <label className="mb-2 block text-sm font-medium">회원 유형</label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-4 gap-2">
                   {MEMBER_TYPES.map(type => (
                     <button
                       key={type.value}
@@ -213,15 +213,15 @@ export default function AuthPage() {
         {/* 소셜 로그인 */}
         <div className="space-y-3">
           <p className="text-center text-xs text-muted-foreground">소셜 계정으로 시작하기</p>
-          <Button variant="outline" className="w-full gap-2" onClick={() => toast('준비 중입니다')}>
+          <Button variant="outline" className="w-full gap-2 opacity-50" disabled>
             <svg width="18" height="18" viewBox="0 0 24 24"><path d="M12 2.04c-5.5 0-10 4.49-10 10.02 0 5 3.66 9.15 8.44 9.9v-7H7.9v-2.9h2.54V9.85c0-2.51 1.49-3.89 3.78-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.78l-.45 2.9h-2.33v7a10 10 0 0 0 8.44-9.9c0-5.53-4.5-10.02-10-10.02z" fill="currentColor" /></svg>
-            Facebook으로 계속
+            Facebook (준비 중)
           </Button>
-          <Button variant="outline" className="w-full gap-2 bg-[#FEE500] text-[#191919] hover:bg-[#FEE500]/90" onClick={() => toast('준비 중입니다')}>
-            카카오로 계속
+          <Button variant="outline" className="w-full gap-2 bg-[#FEE500]/50 text-[#191919]/50" disabled>
+            카카오 (준비 중)
           </Button>
-          <Button variant="outline" className="w-full gap-2 bg-[#03C75A] text-white hover:bg-[#03C75A]/90" onClick={() => toast('준비 중입니다')}>
-            네이버로 계속
+          <Button variant="outline" className="w-full gap-2 bg-[#03C75A]/50 text-white/50" disabled>
+            네이버 (준비 중)
           </Button>
         </div>
       </div>
