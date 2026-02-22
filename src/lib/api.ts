@@ -3,13 +3,11 @@
 // Phase B에서 이 파일만 Supabase 버전으로 교체하면 전환 완료
 // ============================================================
 
-import type { Post, PostListItem, PostDetail, PostFilters, PostStatus, User, ChatRoom, UserSummary } from './types';
+import type { Post, PostListItem, PostDetail, PostFilters, PostStatus, User } from './types';
 import { mockPosts, toPostListItem, getPostImages, getPostTags } from '@/data/posts';
 import { universities } from '@/data/universities';
 import { categories } from '@/data/categories';
 import { getUserSummary, mockUsers } from '@/data/users';
-import { mockChatRooms } from '@/data/chats';
-import { mockNotifications } from '@/data/notifications';
 import { STORAGE_KEYS } from './constants';
 
 // localStorage에서 사용자 생성 게시글 가져오기
@@ -343,160 +341,6 @@ export function bumpPost(postId: string): void {
   const overrides = getPostOverrides();
   overrides[postId] = { ...overrides[postId], bumpedAt: now, updatedAt: now };
   savePostOverrides(overrides);
-}
-
-// B2: localStorage 채팅방 관리
-function getLocalChatRooms(): ChatRoom[] {
-  if (typeof window === 'undefined') return [];
-  try {
-    const saved = localStorage.getItem(STORAGE_KEYS.CHAT_ROOMS);
-    const rooms: ChatRoom[] = saved ? JSON.parse(saved) : [];
-    // buyerId 없는 구 스키마 데이터 필터링
-    return rooms.filter(r => r.buyerId);
-  } catch { return []; }
-}
-
-// 채팅방 unread 오버라이드 관리
-function getChatOverrides(): Record<string, Partial<ChatRoom>> {
-  if (typeof window === 'undefined') return {};
-  try {
-    const saved = localStorage.getItem(STORAGE_KEYS.CHAT_OVERRIDES);
-    return saved ? JSON.parse(saved) : {};
-  } catch { return {}; }
-}
-
-function saveChatOverrides(overrides: Record<string, Partial<ChatRoom>>): void {
-  try {
-    localStorage.setItem(STORAGE_KEYS.CHAT_OVERRIDES, JSON.stringify(overrides));
-  } catch { /* storage full */ }
-}
-
-export function getAllChatRooms(): ChatRoom[] {
-  const rooms = [...mockChatRooms, ...getLocalChatRooms()];
-  const overrides = getChatOverrides();
-  if (Object.keys(overrides).length === 0) return rooms;
-  return rooms.map(r => {
-    const override = overrides[r.id];
-    return override ? { ...r, ...override } : r;
-  });
-}
-
-export function getChatRoomById(roomId: string): ChatRoom | null {
-  return getAllChatRooms().find(r => r.id === roomId) || null;
-}
-
-export function findChatRoomByPost(postId: string, buyerId: string): ChatRoom | null {
-  return getAllChatRooms().find(r =>
-    r.postId === postId && r.buyerId === buyerId
-  ) || null;
-}
-
-export function getMyChats(userId: string): ChatRoom[] {
-  return getAllChatRooms().filter(r =>
-    r.buyerId === userId || r.otherUser.id === userId
-  );
-}
-
-export function findChatRoomByUser(targetUserId: string, currentUserId: string): ChatRoom | null {
-  return getAllChatRooms().find(r =>
-    (r.otherUser.id === targetUserId && r.buyerId === currentUserId) ||
-    (r.buyerId === targetUserId && r.otherUser.id === currentUserId)
-  ) || null;
-}
-
-export function createChatRoom(input: {
-  postId: string;
-  postTitle: string;
-  postPrice: number | null;
-  postThumbnail: string | null;
-  buyerId: string;
-  otherUser: UserSummary;
-  autoMessage?: { senderId: string; content: string };
-}): ChatRoom {
-  const now = new Date().toISOString();
-  const room: ChatRoom = {
-    id: `chat-local-${Date.now()}`,
-    postId: input.postId,
-    postTitle: input.postTitle,
-    postPrice: input.postPrice,
-    postThumbnail: input.postThumbnail,
-    buyerId: input.buyerId,
-    otherUser: input.otherUser,
-    lastMessage: input.autoMessage?.content ?? null,
-    lastMessageAt: input.autoMessage ? now : null,
-    unreadCount: 0,
-    createdAt: now,
-  };
-
-  try {
-    const rooms = getLocalChatRooms();
-    rooms.push(room);
-    localStorage.setItem(STORAGE_KEYS.CHAT_ROOMS, JSON.stringify(rooms));
-  } catch { /* storage full */ }
-
-  // 자동 첫 메시지 저장
-  if (input.autoMessage) {
-    const msg = {
-      id: `local-${Date.now()}`,
-      roomId: room.id,
-      senderId: input.autoMessage.senderId,
-      content: input.autoMessage.content,
-      imageUrl: null,
-      isRead: false,
-      createdAt: now,
-    };
-    try {
-      const saved = localStorage.getItem(STORAGE_KEYS.CHAT_MESSAGES);
-      const allSaved = saved ? JSON.parse(saved) : [];
-      allSaved.push(msg);
-      localStorage.setItem(STORAGE_KEYS.CHAT_MESSAGES, JSON.stringify(allSaved));
-    } catch { /* storage full */ }
-
-    // 알림은 Supabase 연동 시 서버에서 수신자에게만 전송
-    // localStorage 기반에서는 발신자 본인에게 알림이 오는 버그가 있어 비활성화
-  }
-
-  return room;
-}
-
-// 채팅 안읽음 수 합산 (현재 유저의 채팅방만)
-export function getUnreadChatCount(userId: string): number {
-  return getMyChats(userId).reduce((sum, r) => sum + r.unreadCount, 0);
-}
-
-// 채팅방 안읽음 초기화
-export function clearChatUnread(roomId: string): void {
-  const overrides = getChatOverrides();
-  overrides[roomId] = { ...overrides[roomId], unreadCount: 0 };
-  saveChatOverrides(overrides);
-}
-
-// 채팅방 마지막 메시지 갱신
-export function updateChatLastMessage(roomId: string, content: string): void {
-  const overrides = getChatOverrides();
-  overrides[roomId] = {
-    ...overrides[roomId],
-    lastMessage: content,
-    lastMessageAt: new Date().toISOString(),
-  };
-  saveChatOverrides(overrides);
-}
-
-// 알림 안읽음 수 (mock + localStorage 알림)
-export function getUnreadNotificationCount(): number {
-  if (typeof window === 'undefined') return 0;
-  try {
-    const readIds: string[] = JSON.parse(localStorage.getItem(STORAGE_KEYS.NOTIFICATION_READ) || '[]');
-    // mock 알림 중 isRead=false이고 localStorage에서도 읽지 않은 것
-    const mockCount = mockNotifications.filter(n => !n.isRead && !readIds.includes(n.id)).length;
-
-    // localStorage 알림 중 안읽은 것
-    const saved = localStorage.getItem(STORAGE_KEYS.NOTIFICATIONS);
-    const localNotifs: { id: string; isRead: boolean }[] = saved ? JSON.parse(saved) : [];
-    const localCount = localNotifs.filter(n => !n.isRead && !readIds.includes(n.id)).length;
-
-    return mockCount + localCount;
-  } catch { return 0; }
 }
 
 // 클라이언트 전용: 필터링된 로컬 게시글 (Server Component에서는 빈 배열 반환)

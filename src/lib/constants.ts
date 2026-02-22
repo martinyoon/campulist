@@ -7,20 +7,15 @@ export const STORAGE_KEYS = {
   LIKED_POSTS: 'campulist_liked_posts',
   WRITE_DRAFT: 'campulist_write_draft',
   RECENT_SEARCHES: 'campulist_recent_searches',
-  CHAT_MESSAGES: 'campulist_chat_messages',
   USER_POSTS: 'campulist_user_posts',
   POST_OVERRIDES: 'campulist_post_overrides',
-  CHAT_ROOMS: 'campulist_chat_rooms',
   RECENT_VIEWED: 'campulist_recent_viewed',
-  NOTIFICATION_READ: 'campulist_notification_read',
   REPORTS: 'campulist_reports',
   POST_TAGS: 'campulist_post_tags',
   CURRENT_USER: 'campulist_current_user',
   REGISTERED_USERS: 'campulist_registered_users',
-  CHAT_OVERRIDES: 'campulist_chat_overrides',
   POST_IMAGES: 'campulist_post_images',
   SHOW_ICONS: 'campulist_show_icons',
-  NOTIFICATIONS: 'campulist_notifications',
 } as const;
 
 export const LIMITS = {

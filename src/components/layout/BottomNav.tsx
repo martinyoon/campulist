@@ -27,7 +27,7 @@ export default function BottomNav() {
     const update = () => setChatUnread(user ? getMyUnreadTotal(user.id) : 0);
     window.addEventListener('camtalkUpdate', update);
     return () => window.removeEventListener('camtalkUpdate', update);
-  }, [pathname, user]);
+  }, [user]);
 
   return (
     <nav aria-label="하단 메뉴" className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background md:hidden">

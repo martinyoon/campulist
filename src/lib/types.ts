@@ -4,7 +4,7 @@
 
 export type UserRole = 'user' | 'business' | 'admin';
 export type PostStatus = 'active' | 'reserved' | 'completed' | 'hidden';
-export type NotificationType = 'chat' | 'like' | 'keyword' | 'review' | 'system';
+
 export type BizPlan = 'basic' | 'pro' | 'premium';
 export type ReportReason = 'spam' | 'fraud' | 'inappropriate' | 'duplicate' | 'other';
 export type ReportStatus = 'pending' | 'reviewed' | 'resolved' | 'dismissed';
@@ -130,40 +130,6 @@ export interface PostFilters {
   limit?: number;
 }
 
-export interface ChatRoom {
-  id: string;
-  postId: string;
-  postTitle: string;
-  postPrice: number | null;
-  postThumbnail: string | null;
-  buyerId: string;
-  otherUser: UserSummary;
-  lastMessage: string | null;
-  lastMessageAt: string | null;
-  unreadCount: number;
-  createdAt: string;
-}
-
-export interface ChatMessage {
-  id: string;
-  roomId: string;
-  senderId: string;
-  content: string | null;
-  imageUrl: string | null;
-  isRead: boolean;
-  createdAt: string;
-}
-
-export interface Notification {
-  id: string;
-  userId: string;
-  type: NotificationType;
-  title: string;
-  body: string | null;
-  link: string | null;
-  isRead: boolean;
-  createdAt: string;
-}
 
 export interface PostImage {
   id: string;

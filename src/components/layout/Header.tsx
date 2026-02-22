@@ -28,7 +28,7 @@ export default function Header() {
     update();
     window.addEventListener('camnotifUpdate', update);
     return () => window.removeEventListener('camnotifUpdate', update);
-  }, [pathname, user]);
+  }, [user]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
