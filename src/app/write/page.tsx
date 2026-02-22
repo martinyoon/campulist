@@ -18,6 +18,7 @@ import CategoryStepMajor from '@/components/write/CategoryStepMajor';
 import CategoryStepMinor from '@/components/write/CategoryStepMinor';
 import CategorySummary from '@/components/write/CategorySummary';
 import { categoryExamples } from '@/data/categoryExamples';
+import { getCategoryBySlug } from '@/data/categories';
 import type { User } from '@/lib/types';
 
 interface WriteDraft {
@@ -161,6 +162,29 @@ function WritePageContent() {
           if (post.contactMethods.email) setContactEmail(post.contactMethods.email);
         }
         setStep('form');
+        return;
+      }
+    }
+
+    // URL에서 major/minor 카테고리 파라미터 확인 (카테고리 페이지에서 진입 시)
+    const majorParam = params.get('major');
+    if (majorParam) {
+      const majorCat = getCategoryBySlug(majorParam);
+      if (majorCat && majorCat.parentId === null) {
+        initialized.current = true;
+        setMajorId(majorCat.id);
+        const minorParam = params.get('minor');
+        if (minorParam) {
+          const minorCat = getCategoryBySlug(minorParam);
+          if (minorCat && minorCat.parentId === majorCat.id) {
+            setMinorId(minorCat.id);
+            setStep('form');
+          } else {
+            setStep('minor');
+          }
+        } else {
+          setStep('minor');
+        }
         return;
       }
     }

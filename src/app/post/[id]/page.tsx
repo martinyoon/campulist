@@ -79,16 +79,16 @@ export default async function PostDetailPage({ params }: Props) {
 
       {/* 게시글 내용 */}
       <div className="px-4 py-4">
-        <nav className="flex items-center gap-1.5 text-sm text-muted-foreground">
-          <Link href={`/${post.university.slug}`} className="hover:text-blue-500">
+        <nav className="flex items-center gap-1.5 text-sm font-semibold text-amber-600 dark:text-amber-400">
+          <Link href={`/${post.university.slug}`} className="hover:text-amber-500">
             {post.university.name}
           </Link>
           <span>›</span>
-          <Link href={`/${post.university.slug}/${post.categoryMajor.slug}`} className="hover:text-blue-500">
+          <Link href={`/${post.university.slug}/${post.categoryMajor.slug}`} className="hover:text-amber-500">
             <span className="cat-icon">{post.categoryMajor.icon} </span>{post.categoryMajor.name}
           </Link>
           <span>›</span>
-          <Link href={`/${post.university.slug}/${post.categoryMajor.slug}?minor=${post.categoryMinor.slug}`} className="hover:text-blue-500">{post.categoryMinor.name}</Link>
+          <Link href={`/${post.university.slug}/${post.categoryMajor.slug}?minor=${post.categoryMinor.slug}`} className="hover:text-amber-500">{post.categoryMinor.name}</Link>
         </nav>
 
         <div className="mt-2 flex items-center gap-2">

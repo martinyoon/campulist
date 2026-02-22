@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { getUnreadChatCount } from '@/lib/api';
+import { getWriteUrl } from '@/lib/writeUrl';
 
 const navItems = [
   { href: '/', label: '홈', icon: (active: boolean) => <svg width="22" height="22" viewBox="0 0 24 24" fill={active ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg> },
@@ -15,6 +16,8 @@ const navItems = [
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const writeHref = getWriteUrl(pathname, searchParams.toString());
   const [chatUnread, setChatUnread] = useState(0);
 
   useEffect(() => {
@@ -29,7 +32,7 @@ export default function BottomNav() {
           return (
             <Link
               key={item.href}
-              href={item.href}
+              href={item.href === '/write' ? writeHref : item.href}
               aria-label={item.label}
               aria-current={isActive ? 'page' : undefined}
               className={`relative flex flex-col items-center gap-0.5 ${isActive ? 'text-blue-500' : 'text-muted-foreground'}`}

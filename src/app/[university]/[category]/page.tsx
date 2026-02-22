@@ -76,22 +76,22 @@ export default async function CategoryPage({ params, searchParams }: Props) {
 
       {/* 카테고리 헤더 */}
       <div className="border-b border-border px-4 py-4">
-        <nav className="flex items-center gap-1.5 text-sm text-muted-foreground">
-          <Link href={`/${uniSlug}`} className="hover:text-blue-500">
+        <nav className="flex items-center gap-1.5 text-sm font-semibold text-amber-600 dark:text-amber-400">
+          <Link href={`/${uniSlug}`} className="hover:text-amber-500">
             {university.name}
           </Link>
           <span>›</span>
           {activeMinor ? (
-            <Link href={buildUrl({ minor: '' })} className="hover:text-blue-500">
+            <Link href={buildUrl({ minor: '' })} className="hover:text-amber-500">
               <span className="cat-icon">{category.icon} </span>{category.name}
             </Link>
           ) : (
-            <span className="font-medium text-foreground"><span className="cat-icon">{category.icon} </span>{category.name}</span>
+            <span><span className="cat-icon">{category.icon} </span>{category.name}</span>
           )}
           {activeMinor && (
             <>
               <span>›</span>
-              <span className="font-medium text-foreground">{activeMinor.name}</span>
+              <span>{activeMinor.name}</span>
             </>
           )}
         </nav>

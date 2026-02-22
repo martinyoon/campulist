@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -12,11 +12,14 @@ import { universities } from '@/data/universities';
 import { majorCategories } from '@/data/categories';
 import { getUnreadNotificationCount } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
+import { getWriteUrl } from '@/lib/writeUrl';
 
 export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const { user } = useAuth();
+  const searchParams = useSearchParams();
+  const writeHref = getWriteUrl(pathname, searchParams.toString());
   const [searchQuery, setSearchQuery] = useState('');
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -92,7 +95,7 @@ export default function Header() {
           <ThemeToggle />
           {user ? (
             <>
-              <Link href="/write">
+              <Link href={writeHref}>
                 <Button size="sm" className="bg-blue-600 text-white hover:bg-blue-700">
                   글쓰기
                 </Button>

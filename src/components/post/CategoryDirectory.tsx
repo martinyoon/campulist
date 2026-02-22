@@ -66,13 +66,15 @@ export default function CategoryDirectory({
                 {/* 대분류 헤더 */}
                 <button
                   onClick={() => handleMajorClick(major.slug)}
-                  className={`flex w-full items-center gap-1.5 py-2 text-left transition-colors hover:text-blue-500 ${
-                    isActive ? 'text-blue-500' : ''
+                  className={`flex w-full items-center gap-1.5 rounded-lg py-2 text-left transition-colors hover:text-blue-500 ${
+                    isActive
+                      ? 'bg-amber-500/15 px-2 text-amber-600 dark:text-amber-400'
+                      : ''
                   }`}
                 >
-                  <span className="cat-icon text-base">{major.icon}</span>
-                  <span className="text-[13px] font-bold">{major.name}</span>
-                  <span className="ml-auto text-[11px] text-muted-foreground">전체 ›</span>
+                  <span className={`cat-icon ${isActive ? 'text-lg' : 'text-base'}`}>{major.icon}</span>
+                  <span className={isActive ? 'text-sm font-bold' : 'text-[13px] font-bold'}>{major.name}</span>
+                  <span className={`text-[11px] font-normal ${isActive ? 'text-amber-500' : 'text-blue-500'}`}>전체 ›</span>
                 </button>
 
                 {/* 소분류 목록 */}

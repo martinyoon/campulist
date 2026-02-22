@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Geist } from "next/font/google";
 import "./globals.css";
 import ThemeProvider from "@/components/ThemeProvider";
@@ -29,11 +30,15 @@ export default function RootLayout({
         <ThemeProvider>
           <AuthProvider>
             <ToastProvider>
-              <Header />
+              <Suspense>
+                <Header />
+              </Suspense>
               <main className="mx-auto min-h-screen max-w-5xl pb-16 md:pb-0">
                 {children}
               </main>
-              <BottomNav />
+              <Suspense>
+                <BottomNav />
+              </Suspense>
               <ScrollToTop />
             </ToastProvider>
           </AuthProvider>
