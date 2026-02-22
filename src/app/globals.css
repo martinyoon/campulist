@@ -123,4 +123,11 @@
   body {
     @apply bg-background text-foreground;
   }
+  /* 카테고리 아이콘 표시/숨김 */
+  .cat-icon {
+    display: none !important;
+  }
+  .show-cat-icons .cat-icon {
+    display: inline !important;
+  }
 }

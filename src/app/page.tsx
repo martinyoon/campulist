@@ -47,7 +47,7 @@ export default async function HomePage() {
         <>
           <section>
             <div className="flex items-center justify-between px-4 py-4">
-              <h2 className="text-xl font-bold">🏪 캠퍼스라이프</h2>
+              <h2 className="text-xl font-bold"><span className="cat-icon">🏪 </span>캠퍼스라이프</h2>
               <Link href={bizMoreHref} className="text-sm text-blue-500 hover:text-blue-600">더보기</Link>
             </div>
             <div className="flex gap-3 overflow-x-auto px-4 pb-4">

@@ -19,6 +19,7 @@ export const STORAGE_KEYS = {
   REGISTERED_USERS: 'campulist_registered_users',
   CHAT_OVERRIDES: 'campulist_chat_overrides',
   POST_IMAGES: 'campulist_post_images',
+  SHOW_ICONS: 'campulist_show_icons',
 } as const;
 
 export const LIMITS = {

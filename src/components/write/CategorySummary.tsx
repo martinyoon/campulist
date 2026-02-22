@@ -17,7 +17,7 @@ export default function CategorySummary({ majorId, minorId, onChangeCategory }: 
       <div className="flex items-center gap-2">
         <span className="text-sm font-medium text-muted-foreground">카테고리</span>
         <span className="text-sm font-medium">
-          {major?.icon} {major?.name} &rsaquo; {minor?.icon} {minor?.name}
+          <span className="cat-icon">{major?.icon} </span>{major?.name} &rsaquo; <span className="cat-icon">{minor?.icon} </span>{minor?.name}
         </span>
       </div>
       <button

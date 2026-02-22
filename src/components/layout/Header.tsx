@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import ThemeToggle from '@/components/ThemeToggle';
+import IconToggle from '@/components/IconToggle';
 import { universities } from '@/data/universities';
 import { majorCategories } from '@/data/categories';
 import { getUnreadNotificationCount } from '@/lib/api';
@@ -60,7 +61,7 @@ export default function Header() {
                 const isActive = pathname.startsWith(catHref);
                 return (
                   <Link key={cat.slug} href={catHref} className={`text-base ${isActive ? 'font-bold text-blue-500' : 'hover:text-blue-500'}`}>
-                    {cat.icon} {cat.name}
+                    <span className="cat-icon">{cat.icon} </span>{cat.name}
                   </Link>
                 );
               })}
@@ -87,6 +88,7 @@ export default function Header() {
 
         {/* 우측 버튼 */}
         <div className="ml-auto flex items-center gap-1">
+          <IconToggle />
           <ThemeToggle />
           {user ? (
             <>

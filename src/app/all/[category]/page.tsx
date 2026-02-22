@@ -80,10 +80,10 @@ export default async function AllCategoryPage({ params, searchParams }: Props) {
           <span>›</span>
           {activeMinor ? (
             <Link href={buildUrl({ minor: '' })} className="hover:text-blue-500">
-              {category.icon} {category.name}
+              <span className="cat-icon">{category.icon} </span>{category.name}
             </Link>
           ) : (
-            <span className="font-medium text-foreground">{category.icon} {category.name}</span>
+            <span className="font-medium text-foreground"><span className="cat-icon">{category.icon} </span>{category.name}</span>
           )}
           {activeMinor && (
             <>
@@ -93,7 +93,7 @@ export default async function AllCategoryPage({ params, searchParams }: Props) {
           )}
         </nav>
         <div className="mt-1 flex items-center gap-2">
-          <h1 className="text-xl font-bold">{category.icon} {category.name}</h1>
+          <h1 className="text-xl font-bold"><span className="cat-icon">{category.icon} </span>{category.name}</h1>
           <span className="text-sm text-muted-foreground">{posts.length}건</span>
         </div>
       </div>
@@ -114,7 +114,7 @@ export default async function AllCategoryPage({ params, searchParams }: Props) {
               variant={minorSlug === minor.slug ? 'default' : 'outline'}
               className={`shrink-0 cursor-pointer ${minorSlug === minor.slug ? 'bg-blue-600 text-white' : 'hover:bg-muted'}`}
             >
-              {minor.icon} {minor.name}
+              <span className="cat-icon">{minor.icon} </span>{minor.name}
             </Badge>
           </a>
         ))}

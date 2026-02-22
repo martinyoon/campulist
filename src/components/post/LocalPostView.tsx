@@ -96,7 +96,7 @@ export default function LocalPostView({ id }: LocalPostViewProps) {
           </Link>
           <span>›</span>
           <Link href={`/${post.university.slug}/${post.categoryMajor.slug}`} className="hover:text-blue-500">
-            {post.categoryMajor.icon} {post.categoryMajor.name}
+            <span className="cat-icon">{post.categoryMajor.icon} </span>{post.categoryMajor.name}
           </Link>
           <span>›</span>
           <Link href={`/${post.university.slug}/${post.categoryMajor.slug}?minor=${post.categoryMinor.slug}`} className="hover:text-blue-500">{post.categoryMinor.name}</Link>

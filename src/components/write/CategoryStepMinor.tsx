@@ -28,7 +28,7 @@ export default function CategoryStepMinor({
           대분류 다시 선택
         </button>
         <h2 className="text-lg font-bold">
-          {major?.icon} {major?.name}
+          <span className="cat-icon">{major?.icon} </span>{major?.name}
         </h2>
         <p className="text-sm text-muted-foreground">세부 카테고리를 선택해주세요</p>
       </div>
@@ -51,7 +51,7 @@ export default function CategoryStepMinor({
               onChange={() => onSelect(cat.id)}
               className="accent-blue-500"
             />
-            <span className="text-lg">{cat.icon}</span>
+            <span className="cat-icon text-lg">{cat.icon}</span>
             <span className="text-sm font-medium">{cat.name}</span>
           </label>
         ))}

@@ -35,7 +35,7 @@ export default function CategoryStepMajor({ selectedMajorId, onSelect, onContinu
               onChange={() => onSelect(cat.id)}
               className="accent-blue-500"
             />
-            <span className="text-xl">{cat.icon}</span>
+            <span className="cat-icon text-xl">{cat.icon}</span>
             <div className="flex-1">
               <span className="text-sm font-medium">{cat.name}</span>
               <div className="mt-1 flex flex-wrap gap-1">
