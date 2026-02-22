@@ -396,7 +396,10 @@ export function createChatRoom(input: {
   postPrice: number | null;
   postThumbnail: string | null;
   otherUser: UserSummary;
+  autoMessage?: { senderId: string; content: string };
+  buyerNickname?: string;
 }): ChatRoom {
+  const now = new Date().toISOString();
   const room: ChatRoom = {
     id: `chat-local-${Date.now()}`,
     postId: input.postId,
@@ -404,10 +407,10 @@ export function createChatRoom(input: {
     postPrice: input.postPrice,
     postThumbnail: input.postThumbnail,
     otherUser: input.otherUser,
-    lastMessage: null,
-    lastMessageAt: null,
-    unreadCount: 0,
-    createdAt: new Date().toISOString(),
+    lastMessage: input.autoMessage?.content ?? null,
+    lastMessageAt: input.autoMessage ? now : null,
+    unreadCount: input.autoMessage ? 1 : 0,
+    createdAt: now,
   };
 
   try {
@@ -416,7 +419,50 @@ export function createChatRoom(input: {
     localStorage.setItem(STORAGE_KEYS.CHAT_ROOMS, JSON.stringify(rooms));
   } catch { /* storage full */ }
 
+  // 자동 첫 메시지 저장
+  if (input.autoMessage) {
+    const msg = {
+      id: `local-${Date.now()}`,
+      roomId: room.id,
+      senderId: input.autoMessage.senderId,
+      content: input.autoMessage.content,
+      imageUrl: null,
+      isRead: false,
+      createdAt: now,
+    };
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.CHAT_MESSAGES);
+      const allSaved = saved ? JSON.parse(saved) : [];
+      allSaved.push(msg);
+      localStorage.setItem(STORAGE_KEYS.CHAT_MESSAGES, JSON.stringify(allSaved));
+    } catch { /* storage full */ }
+
+    // 판매자에게 알림 생성
+    if (input.buyerNickname) {
+      createChatNotification(input.buyerNickname, input.postTitle);
+    }
+  }
+
   return room;
+}
+
+// 채팅 알림 생성 (localStorage)
+function createChatNotification(buyerNickname: string, postTitle: string): void {
+  const notification = {
+    id: `notif-${Date.now()}`,
+    type: 'chat' as const,
+    title: `${buyerNickname}님이 구매 의사를 보냈습니다`,
+    body: postTitle,
+    link: '/chat',
+    isRead: false,
+    createdAt: new Date().toISOString(),
+  };
+  try {
+    const saved = localStorage.getItem(STORAGE_KEYS.NOTIFICATIONS);
+    const all = saved ? JSON.parse(saved) : [];
+    all.push(notification);
+    localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify(all));
+  } catch { /* storage full */ }
 }
 
 // 채팅 안읽음 수 합산
@@ -431,14 +477,21 @@ export function clearChatUnread(roomId: string): void {
   saveChatOverrides(overrides);
 }
 
-// 알림 안읽음 수 (mock 기본값 + localStorage 읽음 상태 반영)
+// 알림 안읽음 수 (mock + localStorage 알림)
 export function getUnreadNotificationCount(): number {
   if (typeof window === 'undefined') return 0;
   try {
     const readIds: string[] = JSON.parse(localStorage.getItem(STORAGE_KEYS.NOTIFICATION_READ) || '[]');
     // mock 알림 중 기본 isRead=false이고 localStorage에서도 읽지 않은 것
-    const mockUnread = ['n1', 'n2']; // mock에서 isRead: false인 알림 ID
-    return mockUnread.filter(id => !readIds.includes(id)).length;
+    const mockUnread = ['n1', 'n2'];
+    const mockCount = mockUnread.filter(id => !readIds.includes(id)).length;
+
+    // localStorage 알림 중 안읽은 것
+    const saved = localStorage.getItem(STORAGE_KEYS.NOTIFICATIONS);
+    const localNotifs: { id: string; isRead: boolean }[] = saved ? JSON.parse(saved) : [];
+    const localCount = localNotifs.filter(n => !n.isRead && !readIds.includes(n.id)).length;
+
+    return mockCount + localCount;
   } catch { return 0; }
 }
 

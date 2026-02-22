@@ -20,6 +20,7 @@ export const STORAGE_KEYS = {
   CHAT_OVERRIDES: 'campulist_chat_overrides',
   POST_IMAGES: 'campulist_post_images',
   SHOW_ICONS: 'campulist_show_icons',
+  NOTIFICATIONS: 'campulist_notifications',
 } as const;
 
 export const LIMITS = {

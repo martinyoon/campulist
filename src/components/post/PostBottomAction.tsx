@@ -45,6 +45,12 @@ export default function PostBottomAction({ postId, postTitle, postPrice, postThu
 
   // 타인 게시글: 채팅하기 버튼
   const handleChat = () => {
+    if (!user) {
+      toast('로그인이 필요합니다');
+      router.push('/auth');
+      return;
+    }
+
     const existing = findChatRoomByPost(postId);
     if (existing) {
       router.push(`/chat/${existing.id}`);
@@ -57,6 +63,11 @@ export default function PostBottomAction({ postId, postTitle, postPrice, postThu
       postPrice,
       postThumbnail,
       otherUser: author,
+      autoMessage: {
+        senderId: user.id,
+        content: `안녕하세요! "${postTitle}" 게시글을 보고 연락드립니다. 구매 의사가 있습니다.`,
+      },
+      buyerNickname: user.nickname,
     });
     router.push(`/chat/${room.id}`);
   };

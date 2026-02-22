@@ -52,7 +52,7 @@ export default async function PostDetailPage({ params }: Props) {
   }
 
   return (
-    <div className="pb-32 md:pb-4">
+    <div className="pb-24">
       {/* 이미지 갤러리 */}
       <ImageGallery images={post.images} title={post.title} />
 
@@ -157,7 +157,7 @@ export default async function PostDetailPage({ params }: Props) {
       )}
 
       {/* 하단 고정 바 */}
-      <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background px-4 py-3 md:static md:mt-4 md:border-t-0">
+      <div className="fixed bottom-0 left-0 right-0 z-10 border-t border-border bg-background px-4 py-3">
         <div className="mx-auto flex max-w-5xl items-center gap-3">
           <LikeButton postId={post.id} initialLiked={post.isLiked} />
           <ShareButton />

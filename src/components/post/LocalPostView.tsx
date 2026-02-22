@@ -165,7 +165,7 @@ export default function LocalPostView({ id }: LocalPostViewProps) {
       )}
 
       {/* 하단 고정 바 */}
-      <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background px-4 py-3 md:static md:mt-4 md:border-t-0">
+      <div className="fixed bottom-0 left-0 right-0 z-10 border-t border-border bg-background px-4 py-3">
         <div className="mx-auto flex max-w-5xl items-center gap-3">
           <LikeButton postId={post.id} initialLiked={post.isLiked} />
           <ShareButton />

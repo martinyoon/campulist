@@ -8,12 +8,21 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { getChatMessages } from '@/data/chats';
 import { useAuth } from '@/contexts/AuthContext';
+import AuthGuard from '@/components/auth/AuthGuard';
 import { getChatRoomById, clearChatUnread } from '@/lib/api';
 import { formatPrice } from '@/lib/format';
 import { STORAGE_KEYS } from '@/lib/constants';
 import type { ChatMessage } from '@/lib/types';
 
 export default function ChatDetailPage() {
+  return (
+    <AuthGuard>
+      <ChatDetailContent />
+    </AuthGuard>
+  );
+}
+
+function ChatDetailContent() {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuth();
