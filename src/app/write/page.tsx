@@ -482,6 +482,7 @@ function WritePageContent() {
             {/* 선택된 카테고리 요약 */}
             {majorId && minorId && (
               <CategorySummary
+                universityId={universityId}
                 majorId={majorId}
                 minorId={minorId}
                 onChangeCategory={handleChangeCategory}
