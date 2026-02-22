@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { findChatRoomByUser, createChatRoom } from '@/lib/api';
+import { findRoomByUser, startCamTalk } from '@/lib/camtalk';
 import { useAuth } from '@/contexts/AuthContext';
 import type { UserSummary } from '@/lib/types';
 
@@ -18,21 +18,17 @@ export default function UserChatButton({ user: profileUser }: UserChatButtonProp
   if (!currentUser || profileUser.id === currentUser.id) return null;
 
   const handleChat = () => {
-    const existing = findChatRoomByUser(profileUser.id, currentUser.id);
+    const existing = findRoomByUser(profileUser.id, currentUser.id);
     if (existing) {
-      router.push(`/chat/${existing.id}`);
+      router.push(`/camtalk/${existing.id}`);
       return;
     }
 
-    const room = createChatRoom({
-      postId: '',
-      postTitle: `${profileUser.nickname}님과의 대화`,
-      postPrice: null,
-      postThumbnail: null,
-      buyerId: currentUser.id,
-      otherUser: profileUser,
+    const room = startCamTalk({
+      me: { id: currentUser.id, nickname: currentUser.nickname },
+      partner: { id: profileUser.id, nickname: profileUser.nickname },
     });
-    router.push(`/chat/${room.id}`);
+    router.push(`/camtalk/${room.id}`);
   };
 
   return (
@@ -40,7 +36,7 @@ export default function UserChatButton({ user: profileUser }: UserChatButtonProp
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mr-1.5">
         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
       </svg>
-      채팅하기
+      캠톡하기
     </Button>
   );
 }

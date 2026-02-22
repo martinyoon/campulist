@@ -9,6 +9,7 @@ import { universities } from '@/data/universities';
 import { categories } from '@/data/categories';
 import { getUserSummary, mockUsers } from '@/data/users';
 import { mockChatRooms } from '@/data/chats';
+import { mockNotifications } from '@/data/notifications';
 import { STORAGE_KEYS } from './constants';
 
 // localStorage에서 사용자 생성 게시글 가져오기
@@ -411,7 +412,6 @@ export function createChatRoom(input: {
   buyerId: string;
   otherUser: UserSummary;
   autoMessage?: { senderId: string; content: string };
-  buyerNickname?: string;
 }): ChatRoom {
   const now = new Date().toISOString();
   const room: ChatRoom = {
@@ -459,25 +459,6 @@ export function createChatRoom(input: {
   return room;
 }
 
-// 채팅 알림 생성 (localStorage)
-function createChatNotification(buyerNickname: string, postTitle: string): void {
-  const notification = {
-    id: `notif-${Date.now()}`,
-    type: 'chat' as const,
-    title: `${buyerNickname}님이 구매 의사를 보냈습니다`,
-    body: postTitle,
-    link: '/chat',
-    isRead: false,
-    createdAt: new Date().toISOString(),
-  };
-  try {
-    const saved = localStorage.getItem(STORAGE_KEYS.NOTIFICATIONS);
-    const all = saved ? JSON.parse(saved) : [];
-    all.push(notification);
-    localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify(all));
-  } catch { /* storage full */ }
-}
-
 // 채팅 안읽음 수 합산 (현재 유저의 채팅방만)
 export function getUnreadChatCount(userId: string): number {
   return getMyChats(userId).reduce((sum, r) => sum + r.unreadCount, 0);
@@ -506,9 +487,8 @@ export function getUnreadNotificationCount(): number {
   if (typeof window === 'undefined') return 0;
   try {
     const readIds: string[] = JSON.parse(localStorage.getItem(STORAGE_KEYS.NOTIFICATION_READ) || '[]');
-    // mock 알림 중 기본 isRead=false이고 localStorage에서도 읽지 않은 것
-    const mockUnread = ['n1', 'n2'];
-    const mockCount = mockUnread.filter(id => !readIds.includes(id)).length;
+    // mock 알림 중 isRead=false이고 localStorage에서도 읽지 않은 것
+    const mockCount = mockNotifications.filter(n => !n.isRead && !readIds.includes(n.id)).length;
 
     // localStorage 알림 중 안읽은 것
     const saved = localStorage.getItem(STORAGE_KEYS.NOTIFICATIONS);

@@ -5,8 +5,9 @@ import Link from 'next/link';
 import { Separator } from '@/components/ui/separator';
 import EmptyState from '@/components/ui/EmptyState';
 import { formatRelativeTime } from '@/lib/format';
-import { STORAGE_KEYS } from '@/lib/constants';
-import { mockNotifications } from '@/data/notifications';
+import { getNotif2All, getNotif2UnreadCount, markNotif2Read, markNotif2AllRead, isNotif2Read } from '@/lib/notification2';
+import { useAuth } from '@/contexts/AuthContext';
+import AuthGuard from '@/components/auth/AuthGuard';
 import type { Notification } from '@/lib/types';
 
 // 알림 타입별 SVG 아이콘
@@ -21,7 +22,7 @@ function NotificationIcon({ type }: { type: string }) {
       return <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>;
     case 'review':
       return <svg className={cls} viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>;
-    default: // system
+    default:
       return <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m3 11 18-5v12L3 13v-2z" /><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6" /></svg>;
   }
 }
@@ -34,54 +35,34 @@ const typeColors: Record<string, string> = {
   system: 'text-muted-foreground',
 };
 
-function getReadIds(): string[] {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEYS.NOTIFICATION_READ) || '[]');
-  } catch { return []; }
+export default function Notifications2Page() {
+  return (
+    <AuthGuard>
+      <Notifications2Content />
+    </AuthGuard>
+  );
 }
 
-function saveReadIds(ids: string[]): void {
-  try {
-    localStorage.setItem(STORAGE_KEYS.NOTIFICATION_READ, JSON.stringify(ids));
-  } catch { /* ignore */ }
-}
-
-function getLocalNotifications(): Notification[] {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEYS.NOTIFICATIONS);
-    return saved ? JSON.parse(saved) : [];
-  } catch { return []; }
-}
-
-export default function NotificationsPage() {
-  const [readIds, setReadIds] = useState<string[]>([]);
-  const [allNotifications, setAllNotifications] = useState<Notification[]>([]);
+function Notifications2Content() {
+  const { user } = useAuth();
+  const userId = user?.id ?? '';
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     document.title = '알림 | 캠퍼스리스트';
-    setReadIds(getReadIds());
-    // mock + localStorage 알림 통합, 최신순 정렬
-    const merged = [...mockNotifications, ...getLocalNotifications()]
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    setAllNotifications(merged);
-  }, []);
+    setNotifications(getNotif2All(userId));
+    setUnreadCount(getNotif2UnreadCount(userId));
+  }, [userId]);
 
-  const isRead = (notif: Notification) => notif.isRead || readIds.includes(notif.id);
-  const unreadCount = allNotifications.filter(n => !isRead(n)).length;
-
-  const markAsRead = (id: string) => {
-    if (readIds.includes(id)) return;
-    const next = [...readIds, id];
-    setReadIds(next);
-    saveReadIds(next);
-    window.dispatchEvent(new Event('notificationUpdate'));
+  const handleRead = (id: string) => {
+    markNotif2Read(id);
+    setUnreadCount(getNotif2UnreadCount(userId));
   };
 
-  const markAllAsRead = () => {
-    const allIds = allNotifications.map(n => n.id);
-    setReadIds(allIds);
-    saveReadIds(allIds);
-    window.dispatchEvent(new Event('notificationUpdate'));
+  const handleReadAll = () => {
+    markNotif2AllRead(userId);
+    setUnreadCount(0);
   };
 
   return (
@@ -93,7 +74,7 @@ export default function NotificationsPage() {
             <>
               <span className="text-sm text-blue-500">{unreadCount}개 읽지 않음</span>
               <button
-                onClick={markAllAsRead}
+                onClick={handleReadAll}
                 className="text-sm text-muted-foreground hover:text-foreground"
               >
                 전체 읽음
@@ -105,17 +86,17 @@ export default function NotificationsPage() {
 
       <Separator />
 
-      {allNotifications.length === 0 ? (
+      {notifications.length === 0 ? (
         <EmptyState message="알림이 없습니다" />
       ) : (
         <div>
-          {allNotifications.map(notif => {
-            const read = isRead(notif);
+          {notifications.map(notif => {
+            const read = isNotif2Read(notif);
             return (
               <Link
                 key={notif.id}
                 href={notif.link || '#'}
-                onClick={() => markAsRead(notif.id)}
+                onClick={() => handleRead(notif.id)}
                 className={`flex gap-3 px-4 py-3.5 transition-colors hover:bg-muted ${
                   !read ? 'bg-blue-500/5' : ''
                 }`}

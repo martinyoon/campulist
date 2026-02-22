@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import EmptyState from '@/components/ui/EmptyState';
-import { getMyChats } from '@/lib/api';
+import { getChat2Rooms } from '@/lib/chat2';
 import { getUserSummary } from '@/data/users';
 import { formatRelativeTime } from '@/lib/format';
 import type { ChatRoom, UserSummary } from '@/lib/types';
@@ -17,29 +17,14 @@ function getChatPartner(chat: ChatRoom, myId: string): UserSummary {
   return getUserSummary(chat.buyerId);
 }
 
-function ChatPageContent() {
+function Chat2Content() {
   const { user } = useAuth();
   const [chats, setChats] = useState<ChatRoom[]>([]);
 
   useEffect(() => {
     document.title = '채팅 | 캠퍼스리스트';
     if (!user) return;
-
-    const loadChats = () => {
-      const rooms = getMyChats(user.id);
-      rooms.sort((a, b) => {
-        const aTime = a.lastMessageAt || a.createdAt;
-        const bTime = b.lastMessageAt || b.createdAt;
-        return new Date(bTime).getTime() - new Date(aTime).getTime();
-      });
-      setChats(rooms);
-    };
-
-    loadChats();
-
-    // 채팅 목록 실시간 갱신
-    window.addEventListener('chatUpdate', loadChats);
-    return () => window.removeEventListener('chatUpdate', loadChats);
+    setChats(getChat2Rooms(user.id));
   }, [user]);
 
   return (
@@ -62,7 +47,7 @@ function ChatPageContent() {
             return (
               <Link
                 key={chat.id}
-                href={`/chat/${chat.id}`}
+                href={`/chat2/${chat.id}`}
                 className="flex items-center gap-3 border-b border-border px-4 py-3.5 transition-colors hover:bg-muted"
               >
                 <Avatar className="size-12">
@@ -105,10 +90,10 @@ function ChatPageContent() {
   );
 }
 
-export default function ChatPage() {
+export default function Chat2Page() {
   return (
     <AuthGuard>
-      <ChatPageContent />
+      <Chat2Content />
     </AuthGuard>
   );
 }

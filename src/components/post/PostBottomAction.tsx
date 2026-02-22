@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { useToast } from '@/components/ui/Toast';
-import { bumpPost, findChatRoomByPost, createChatRoom } from '@/lib/api';
+import { bumpPost } from '@/lib/api';
+import { findRoomByUser, startCamTalk } from '@/lib/camtalk';
 import { useAuth } from '@/contexts/AuthContext';
 import type { UserSummary } from '@/lib/types';
 
@@ -57,27 +58,19 @@ export default function PostBottomAction({ postId, postTitle, postPrice, postThu
   const sendMessage = (content: string) => {
     if (!user || !content.trim()) return;
 
-    // 첫 메시지에 게시글 제목을 포함하여 어떤 게시글 문의인지 명확히 함
-    const messageWithPost = `[${postTitle}]\n${content.trim()}`;
+    // 첫 메시지에 게시글 링크를 포함하여 어떤 게시글 문의인지 명확히 함
+    const messageWithPost = `[${postTitle}]\n/post/${postId}\n\n${content.trim()}`;
 
-    const room = createChatRoom({
-      postId,
-      postTitle,
-      postPrice,
-      postThumbnail,
-      buyerId: user.id,
-      otherUser: author,
-      autoMessage: {
-        senderId: user.id,
-        content: messageWithPost,
-      },
-      buyerNickname: user.nickname,
+    const room = startCamTalk({
+      me: { id: user.id, nickname: user.nickname },
+      partner: { id: author.id, nickname: author.nickname },
+      firstMessage: messageWithPost,
     });
     setOpen(false);
-    router.push(`/chat/${room.id}`);
+    router.push(`/camtalk/${room.id}`);
   };
 
-  // 타인 게시글: 채팅하기 버튼
+  // 타인 게시글: 캠톡하기 버튼
   const handleChat = () => {
     if (!user) {
       toast('로그인이 필요합니다');
@@ -85,9 +78,9 @@ export default function PostBottomAction({ postId, postTitle, postPrice, postThu
       return;
     }
 
-    const existing = findChatRoomByPost(postId, user.id);
+    const existing = findRoomByUser(author.id, user.id);
     if (existing) {
-      router.push(`/chat/${existing.id}`);
+      router.push(`/camtalk/${existing.id}`);
       return;
     }
 
@@ -99,13 +92,13 @@ export default function PostBottomAction({ postId, postTitle, postPrice, postThu
   return (
     <>
       <Button onClick={handleChat} className="bg-blue-600 px-8 text-white hover:bg-blue-700">
-        채팅하기
+        캠톡하기
       </Button>
 
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent side="bottom" className="rounded-t-2xl" showCloseButton={false}>
           <SheetHeader className="pb-2">
-            <SheetTitle className="text-lg">채팅 메시지 선택</SheetTitle>
+            <SheetTitle className="text-lg">캠톡 메시지 선택</SheetTitle>
           </SheetHeader>
           <div className="space-y-2 px-4 pb-6">
             {QUICK_MESSAGES.map(msg => (

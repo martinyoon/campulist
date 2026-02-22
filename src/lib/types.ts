@@ -156,6 +156,7 @@ export interface ChatMessage {
 
 export interface Notification {
   id: string;
+  userId: string;
   type: NotificationType;
   title: string;
   body: string | null;

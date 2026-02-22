@@ -690,10 +690,10 @@ function WritePageContent() {
             <div>
               <label className="mb-2 block text-sm font-medium">연락 방법</label>
               <div className="space-y-3 rounded-xl border border-border p-4">
-                {/* 캠퍼스리스트 채팅 (항상 활성) */}
+                {/* 캠퍼스리스트 캠톡 (항상 활성) */}
                 <label className="flex items-center gap-2.5 text-sm">
                   <input type="checkbox" checked disabled className="rounded" />
-                  <span className="font-medium text-foreground">캠퍼스리스트 채팅</span>
+                  <span className="font-medium text-foreground">캠퍼스리스트 캠톡</span>
                   <span className="text-xs text-muted-foreground">(기본)</span>
                 </label>
 

@@ -132,7 +132,7 @@ function MyPageContent() {
       {/* 메뉴 */}
       <div className="border-b border-border py-1">
         {[
-          { icon: '🔔', label: '알림 설정', href: '/notifications' },
+          { icon: '🔔', label: '캠알림', href: '/camnotif' },
           { icon: 'ℹ️', label: '서비스 소개', href: '/about' },
         ].map(item => (
           <Link
@@ -318,7 +318,7 @@ function MyPageContent() {
               탈퇴 시 모든 데이터가 삭제되며 복구할 수 없습니다.
             </p>
             <ul className="space-y-1 text-sm text-muted-foreground">
-              <li>• 작성한 게시글 및 채팅 내역</li>
+              <li>• 작성한 게시글 및 캠톡 내역</li>
               <li>• 찜한 목록 및 검색 기록</li>
               <li>• 알림 및 임시저장 데이터</li>
             </ul>
