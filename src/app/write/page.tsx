@@ -17,6 +17,8 @@ import type { PostStatus, MemberType } from '@/lib/types';
 import CategoryStepMajor from '@/components/write/CategoryStepMajor';
 import CategoryStepMinor from '@/components/write/CategoryStepMinor';
 import CategorySummary from '@/components/write/CategorySummary';
+import { categoryExamples } from '@/data/categoryExamples';
+import type { User } from '@/lib/types';
 
 interface WriteDraft {
   title: string;
@@ -43,6 +45,19 @@ const MEMBER_TYPE_SHORT: Record<MemberType, string> = {
   general: '일반인',
 };
 
+function fillTemplate(template: string, user: User, universityId: number): string {
+  const uni = universities.find(u => u.id === universityId);
+  const uniShort = uni?.name.replace('대학교', '대') || '대학';
+  const typeLabel = MEMBER_TYPE_SHORT[user.memberType] || '';
+  const dept = user.department || '본인학과';
+
+  return template
+    .replace(/\{\{prefix\}\}/g, `[${uniShort}][${typeLabel}]`)
+    .replace(/\{\{university\}\}/g, uniShort)
+    .replace(/\{\{department\}\}/g, dept)
+    .replace(/\{\{memberType\}\}/g, typeLabel);
+}
+
 function WritePageContent() {
   const router = useRouter();
   const { toast } = useToast();
@@ -64,6 +79,11 @@ function WritePageContent() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [postStatus, setPostStatus] = useState<PostStatus>('active');
   const [images, setImages] = useState<string[]>([]);
+  const [contactPhone, setContactPhone] = useState('');
+  const [contactPhoneCall, setContactPhoneCall] = useState(true);
+  const [contactPhoneSms, setContactPhoneSms] = useState(true);
+  const [contactKakao, setContactKakao] = useState('');
+  const [contactEmail, setContactEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const initialized = useRef(false);
 
@@ -131,6 +151,15 @@ function WritePageContent() {
         setLocation(post.locationDetail || '');
         setPostStatus(post.status);
         setImages(getPostImages(editParam));
+        if (post.contactMethods) {
+          if (post.contactMethods.phone) {
+            setContactPhone(post.contactMethods.phone);
+            setContactPhoneCall(post.contactMethods.phoneCall ?? true);
+            setContactPhoneSms(post.contactMethods.phoneSms ?? true);
+          }
+          if (post.contactMethods.kakaoLink) setContactKakao(post.contactMethods.kakaoLink);
+          if (post.contactMethods.email) setContactEmail(post.contactMethods.email);
+        }
         setStep('form');
         return;
       }
@@ -250,6 +279,50 @@ function WritePageContent() {
     }
   };
 
+  // 예시 채우기 기능
+  const hasExample = !isEditMode && minorId && categoryExamples[minorId];
+
+  const fillTitleExample = () => {
+    if (!minorId || !user || !categoryExamples[minorId]) return;
+    const ex = categoryExamples[minorId];
+    if (title.trim() && title.trim() !== `[${universities.find(u => u.id === universityId)?.name.replace('대학교', '대')}][${MEMBER_TYPE_SHORT[user.memberType]}] `) {
+      if (!window.confirm('기존 제목을 예시로 대체할까요?')) return;
+    }
+    setTitle(fillTemplate(ex.title, user, universityId));
+  };
+
+  const fillPriceExample = () => {
+    if (!minorId || !user || !categoryExamples[minorId]) return;
+    const ex = categoryExamples[minorId];
+    if (price && !window.confirm('기존 가격을 예시로 대체할까요?')) return;
+    setPrice(ex.price);
+    setPriceNegotiable(ex.negotiable);
+  };
+
+  const fillBodyExample = () => {
+    if (!minorId || !user || !categoryExamples[minorId]) return;
+    const ex = categoryExamples[minorId];
+    if (body.trim() && !window.confirm('기존 내용을 예시로 대체할까요?')) return;
+    setBody(fillTemplate(ex.body, user, universityId));
+  };
+
+  const fillAllExamples = () => {
+    if (!minorId || !user || !categoryExamples[minorId]) return;
+    const hasContent = title.trim() || body.trim() || price;
+    if (hasContent && !window.confirm('모든 필드를 예시로 대체할까요?')) return;
+    const ex = categoryExamples[minorId];
+    setTitle(fillTemplate(ex.title, user, universityId));
+    setPrice(ex.price);
+    setPriceNegotiable(ex.negotiable);
+    setBody(fillTemplate(ex.body, user, universityId));
+    if (ex.tags.length > 0) {
+      setTags(ex.tags.slice(0, 5).map(t => fillTemplate(t, user, universityId)));
+    }
+    if (ex.location) {
+      setLocation(fillTemplate(ex.location, user, universityId));
+    }
+  };
+
   const validate = (): Record<string, string> => {
     const errs: Record<string, string> = {};
     if (!title.trim()) errs.title = '제목을 입력해주세요';
@@ -273,6 +346,13 @@ function WritePageContent() {
 
     setSubmitting(true);
 
+    const contactMethods = {
+      chat: true,
+      ...(contactPhone.trim() && { phone: contactPhone.trim(), phoneCall: contactPhoneCall, phoneSms: contactPhoneSms }),
+      ...(contactKakao.trim() && { kakaoLink: contactKakao.trim() }),
+      ...(contactEmail.trim() && { email: contactEmail.trim() }),
+    };
+
     const postData = {
       title: title.trim(),
       body: body.trim(),
@@ -282,6 +362,7 @@ function WritePageContent() {
       price: price ? Number(price) : null,
       priceNegotiable,
       locationDetail: location.trim() || null,
+      contactMethods,
     };
 
     if (isEditMode && editId) {
@@ -389,6 +470,17 @@ function WritePageContent() {
               />
             )}
 
+            {/* 전체 예시 채우기 */}
+            {hasExample && (
+              <button
+                type="button"
+                onClick={fillAllExamples}
+                className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-blue-500/30 bg-blue-500/5 py-2.5 text-sm font-medium text-blue-500 transition-colors hover:bg-blue-500/10"
+              >
+                <span>💡</span> 전체 예시 채우기
+              </button>
+            )}
+
             {/* 거래 상태 (수정 모드만) */}
             {isEditMode && (
               <div>
@@ -433,7 +525,12 @@ function WritePageContent() {
 
             {/* 제목 */}
             <div id="field-title">
-              <label className="mb-1.5 block text-sm font-medium">제목 <span className="text-red-500">*</span></label>
+              <div className="mb-1.5 flex items-center justify-between">
+                <label className="text-sm font-medium">제목 <span className="text-red-500">*</span></label>
+                {hasExample && (
+                  <button type="button" onClick={fillTitleExample} className="text-xs text-blue-500 hover:underline">💡 예시</button>
+                )}
+              </div>
               <Input
                 placeholder="제목을 입력하세요"
                 value={title}
@@ -448,7 +545,12 @@ function WritePageContent() {
 
             {/* 가격 */}
             <div id="field-price">
-              <label className="mb-1.5 block text-sm font-medium">가격</label>
+              <div className="mb-1.5 flex items-center justify-between">
+                <label className="text-sm font-medium">가격</label>
+                {hasExample && (
+                  <button type="button" onClick={fillPriceExample} className="text-xs text-blue-500 hover:underline">💡 예시</button>
+                )}
+              </div>
               <div className="flex items-center gap-2">
                 <Input
                   type="number"
@@ -474,7 +576,12 @@ function WritePageContent() {
 
             {/* 본문 */}
             <div id="field-body">
-              <label className="mb-1.5 block text-sm font-medium">내용 <span className="text-red-500">*</span></label>
+              <div className="mb-1.5 flex items-center justify-between">
+                <label className="text-sm font-medium">내용 <span className="text-red-500">*</span></label>
+                {hasExample && (
+                  <button type="button" onClick={fillBodyExample} className="text-xs text-blue-500 hover:underline">💡 예시</button>
+                )}
+              </div>
               <textarea
                 placeholder="내용을 입력하세요"
                 value={body}
@@ -558,6 +665,101 @@ function WritePageContent() {
                 value={location}
                 onChange={e => setLocation(e.target.value)}
               />
+            </div>
+
+            {/* 연락 방법 */}
+            <div>
+              <label className="mb-2 block text-sm font-medium">연락 방법</label>
+              <div className="space-y-3 rounded-xl border border-border p-4">
+                {/* 캠퍼스리스트 채팅 (항상 활성) */}
+                <label className="flex items-center gap-2.5 text-sm">
+                  <input type="checkbox" checked disabled className="rounded" />
+                  <span className="font-medium text-foreground">캠퍼스리스트 채팅</span>
+                  <span className="text-xs text-muted-foreground">(기본)</span>
+                </label>
+
+                {/* 전화번호 */}
+                <div>
+                  <label className="flex items-center gap-2.5 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={!!contactPhone}
+                      onChange={e => { if (!e.target.checked) { setContactPhone(''); setContactPhoneCall(true); setContactPhoneSms(true); } else { setContactPhone(' '); } }}
+                      className="rounded"
+                    />
+                    <span className="text-foreground">전화번호 공개</span>
+                  </label>
+                  {!!contactPhone && (
+                    <div className="mt-2 ml-7 space-y-2">
+                      <Input
+                        type="tel"
+                        placeholder="010-0000-0000"
+                        value={contactPhone.trim()}
+                        onChange={e => setContactPhone(e.target.value)}
+                        className="max-w-xs"
+                      />
+                      <div className="flex gap-4">
+                        <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <input type="checkbox" checked={contactPhoneCall} onChange={e => setContactPhoneCall(e.target.checked)} className="rounded" />
+                          전화 OK
+                        </label>
+                        <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <input type="checkbox" checked={contactPhoneSms} onChange={e => setContactPhoneSms(e.target.checked)} className="rounded" />
+                          문자 OK
+                        </label>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* 카카오 오픈채팅 */}
+                <div>
+                  <label className="flex items-center gap-2.5 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={!!contactKakao}
+                      onChange={e => { if (!e.target.checked) setContactKakao(''); else setContactKakao(' '); }}
+                      className="rounded"
+                    />
+                    <span className="text-foreground">카카오 오픈채팅</span>
+                  </label>
+                  {!!contactKakao && (
+                    <div className="mt-2 ml-7">
+                      <Input
+                        type="url"
+                        placeholder="https://open.kakao.com/o/..."
+                        value={contactKakao.trim()}
+                        onChange={e => setContactKakao(e.target.value)}
+                        className="max-w-sm"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* 이메일 */}
+                <div>
+                  <label className="flex items-center gap-2.5 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={!!contactEmail}
+                      onChange={e => { if (!e.target.checked) setContactEmail(''); else setContactEmail(user?.email || ' '); }}
+                      className="rounded"
+                    />
+                    <span className="text-foreground">이메일 공개</span>
+                  </label>
+                  {!!contactEmail && (
+                    <div className="mt-2 ml-7">
+                      <Input
+                        type="email"
+                        placeholder="example@university.ac.kr"
+                        value={contactEmail.trim()}
+                        onChange={e => setContactEmail(e.target.value)}
+                        className="max-w-sm"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
 
             {/* 등록 버튼 */}

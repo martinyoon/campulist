@@ -206,6 +206,7 @@ export function updatePost(postId: string, input: {
   price: number | null;
   priceNegotiable: boolean;
   locationDetail: string | null;
+  contactMethods?: import('./types').ContactMethods;
   tags?: string[];
   images?: string[];
   status?: PostStatus;
@@ -273,6 +274,7 @@ export function createPost(input: {
   price: number | null;
   priceNegotiable: boolean;
   locationDetail: string | null;
+  contactMethods?: import('./types').ContactMethods;
   tags: string[];
   images?: string[];
 }): Post {
@@ -290,6 +292,7 @@ export function createPost(input: {
     isPremium: false,
     status: 'active',
     locationDetail: input.locationDetail,
+    contactMethods: input.contactMethods,
     viewCount: 0,
     likeCount: 0,
     bumpedAt: now,

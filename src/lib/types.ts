@@ -60,6 +60,15 @@ export interface CategoryGroup {
   minors: Category[];
 }
 
+export interface ContactMethods {
+  chat: boolean;         // 인앱 채팅 (항상 true)
+  phone?: string;        // 전화번호 (선택)
+  phoneCall?: boolean;   // 전화 허용
+  phoneSms?: boolean;    // 문자 허용
+  kakaoLink?: string;    // 카카오 오픈채팅 링크 (선택)
+  email?: string;        // 이메일 (선택)
+}
+
 export interface Post {
   id: string;
   title: string;
@@ -73,6 +82,7 @@ export interface Post {
   isPremium: boolean;
   status: PostStatus;
   locationDetail: string | null;
+  contactMethods?: ContactMethods;
   viewCount: number;
   likeCount: number;
   bumpedAt: string;
@@ -217,6 +227,7 @@ export interface PostCreateInput {
   price: number | null;
   priceNegotiable: boolean;
   locationDetail: string | null;
+  contactMethods?: ContactMethods;
   tags: string[];
   images: File[];
 }

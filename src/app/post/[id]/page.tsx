@@ -15,6 +15,7 @@ import PostStatusControl from '@/components/post/PostStatusControl';
 import PostBottomAction from '@/components/post/PostBottomAction';
 import ViewCountTracker from '@/components/post/ViewCountTracker';
 import LocalPostView from '@/components/post/LocalPostView';
+import ContactMethodsDisplay from '@/components/post/ContactMethodsDisplay';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -132,6 +133,9 @@ export default async function PostDetailPage({ params }: Props) {
             {post.locationDetail}
           </div>
         )}
+
+        {/* 연락 방법 */}
+        <ContactMethodsDisplay contactMethods={post.contactMethods} />
       </div>
 
       {/* A1: 거래 상태 변경 (작성자만 표시) */}

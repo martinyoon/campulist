@@ -14,6 +14,7 @@ import PostStatusControl from '@/components/post/PostStatusControl';
 import PostBottomAction from '@/components/post/PostBottomAction';
 import ViewCountTracker from '@/components/post/ViewCountTracker';
 import PostCard from '@/components/post/PostCard';
+import ContactMethodsDisplay from '@/components/post/ContactMethodsDisplay';
 import { getPostDetail, getRelatedPosts } from '@/lib/api';
 import { formatPrice, formatRelativeTime } from '@/lib/format';
 import type { PostDetail, PostListItem } from '@/lib/types';
@@ -142,6 +143,9 @@ export default function LocalPostView({ id }: LocalPostViewProps) {
             {post.locationDetail}
           </div>
         )}
+
+        {/* 연락 방법 */}
+        <ContactMethodsDisplay contactMethods={post.contactMethods} />
       </div>
 
       <PostStatusControl postId={post.id} authorId={post.authorId} initialStatus={post.status} />
