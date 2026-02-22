@@ -24,10 +24,10 @@ export default function CategoryGrid({ universitySlug }: CategoryGridProps) {
           <button
             key={cat.slug}
             onClick={() => handleClick(cat.id)}
-            className="flex flex-col items-center gap-1.5 rounded-xl py-3.5 transition-colors hover:bg-muted"
+            className="flex flex-col items-center gap-2 rounded-xl border border-border py-4 transition-colors hover:border-blue-500/50 hover:bg-blue-500/5"
           >
-            <span className="cat-icon text-3xl">{cat.icon}</span>
-            <span className="text-[15px] font-semibold text-foreground">{cat.name}</span>
+            <span className="cat-icon text-4xl">{cat.icon}</span>
+            <span className="text-lg font-bold text-amber-600 dark:text-amber-400">{cat.name}</span>
           </button>
         ))}
       </div>

@@ -76,22 +76,22 @@ export default async function CategoryPage({ params, searchParams }: Props) {
 
       {/* 카테고리 헤더 */}
       <div className="border-b border-border px-4 py-4">
-        <nav className="flex items-center gap-1.5 text-sm font-semibold text-amber-600 dark:text-amber-400">
-          <Link href={`/${uniSlug}`} className="hover:text-amber-500">
+        <nav className="flex items-center gap-2 rounded-lg bg-amber-500/10 px-3 py-2 text-lg text-amber-600 dark:bg-amber-500/15 dark:text-amber-400">
+          <Link href={`/${uniSlug}`} className="font-semibold hover:text-amber-500 hover:underline">
             {university.name}
           </Link>
-          <span>›</span>
+          <span className="font-normal text-amber-400/50">›</span>
           {activeMinor ? (
-            <Link href={buildUrl({ minor: '' })} className="hover:text-amber-500">
+            <Link href={buildUrl({ minor: '' })} className="font-semibold hover:text-amber-500 hover:underline">
               <span className="cat-icon">{category.icon} </span>{category.name}
             </Link>
           ) : (
-            <span><span className="cat-icon">{category.icon} </span>{category.name}</span>
+            <span className="font-bold"><span className="cat-icon">{category.icon} </span>{category.name}</span>
           )}
           {activeMinor && (
             <>
-              <span>›</span>
-              <span>{activeMinor.name}</span>
+              <span className="font-normal text-amber-400/50">›</span>
+              <span className="font-bold">{activeMinor.name}</span>
             </>
           )}
         </nav>
@@ -144,7 +144,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         categoryMajorId={category.id}
         categoryMinorId={minorSlug ? minors.find(m => m.slug === minorSlug)?.id : undefined}
         sortBy={sortBy}
-        emptyState={<EmptyState message="이 카테고리에 게시글이 없습니다." actionLabel="글쓰기" actionHref="/write" />}
+        emptyState={<EmptyState message="이 카테고리에 게시글이 없습니다." />}
       />
     </div>
   );

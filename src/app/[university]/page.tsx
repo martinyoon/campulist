@@ -75,7 +75,7 @@ export default async function UniversityPage({ params, searchParams }: Props) {
           serverPosts={posts}
           universityId={university.id}
           sortBy={sortBy}
-          emptyState={<EmptyState message="아직 게시글이 없습니다." actionLabel="첫 번째 글 작성하기" actionHref="/write" />}
+          emptyState={<EmptyState message="아직 게시글이 없습니다." />}
         />
       </section>
     </div>

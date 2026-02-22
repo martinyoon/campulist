@@ -72,9 +72,9 @@ export default function CategoryDirectory({
                       : ''
                   }`}
                 >
-                  <span className={`cat-icon ${isActive ? 'text-lg' : 'text-base'}`}>{major.icon}</span>
-                  <span className={isActive ? 'text-sm font-bold' : 'text-[13px] font-bold'}>{major.name}</span>
-                  <span className={`text-[11px] font-normal ${isActive ? 'text-amber-500' : 'text-blue-500'}`}>전체 ›</span>
+                  <span className={`cat-icon ${isActive ? 'text-xl' : 'text-lg'}`}>{major.icon}</span>
+                  <span className={isActive ? 'text-lg font-bold' : 'text-lg font-bold'}>{major.name}</span>
+                  <span className={`text-lg font-normal ${isActive ? 'text-amber-500' : 'text-blue-500'}`}>전체 ›</span>
                 </button>
 
                 {/* 소분류 목록 */}

@@ -79,16 +79,16 @@ export default async function PostDetailPage({ params }: Props) {
 
       {/* 게시글 내용 */}
       <div className="px-4 py-4">
-        <nav className="flex items-center gap-1.5 text-sm font-semibold text-amber-600 dark:text-amber-400">
-          <Link href={`/${post.university.slug}`} className="hover:text-amber-500">
+        <nav className="flex items-center gap-2 rounded-lg bg-amber-500/10 px-3 py-2 text-lg font-semibold text-amber-600 dark:bg-amber-500/15 dark:text-amber-400">
+          <Link href={`/${post.university.slug}`} className="hover:text-amber-500 hover:underline">
             {post.university.name}
           </Link>
-          <span>›</span>
-          <Link href={`/${post.university.slug}/${post.categoryMajor.slug}`} className="hover:text-amber-500">
+          <span className="font-normal text-amber-400/50">›</span>
+          <Link href={`/${post.university.slug}/${post.categoryMajor.slug}`} className="hover:text-amber-500 hover:underline">
             <span className="cat-icon">{post.categoryMajor.icon} </span>{post.categoryMajor.name}
           </Link>
-          <span>›</span>
-          <Link href={`/${post.university.slug}/${post.categoryMajor.slug}?minor=${post.categoryMinor.slug}`} className="hover:text-amber-500">{post.categoryMinor.name}</Link>
+          <span className="font-normal text-amber-400/50">›</span>
+          <Link href={`/${post.university.slug}/${post.categoryMajor.slug}?minor=${post.categoryMinor.slug}`} className="hover:text-amber-500 hover:underline">{post.categoryMinor.name}</Link>
         </nav>
 
         <div className="mt-2 flex items-center gap-2">

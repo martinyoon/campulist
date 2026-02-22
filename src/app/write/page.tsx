@@ -14,11 +14,9 @@ import { createPost, getPostForEdit, updatePost, deletePost } from '@/lib/api';
 import { getPostImages } from '@/data/posts';
 import { LIMITS } from '@/lib/constants';
 import type { PostStatus, MemberType } from '@/lib/types';
-import CategoryStepMajor from '@/components/write/CategoryStepMajor';
-import CategoryStepMinor from '@/components/write/CategoryStepMinor';
 import CategorySummary from '@/components/write/CategorySummary';
 import { categoryExamples } from '@/data/categoryExamples';
-import { getCategoryBySlug } from '@/data/categories';
+import { getCategoryBySlug, getCategoryGroups } from '@/data/categories';
 import type { User } from '@/lib/types';
 
 interface WriteDraft {
@@ -46,15 +44,17 @@ const MEMBER_TYPE_SHORT: Record<MemberType, string> = {
   general: '일반인',
 };
 
-function fillTemplate(template: string, user: User, universityId: number): string {
-  const uni = universities.find(u => u.id === universityId);
-  const uniShort = uni?.name.replace('대학교', '대') || '대학';
+function fillTemplate(template: string, user: User, targetUniversityId: number): string {
+  const targetUni = universities.find(u => u.id === targetUniversityId);
+  const targetShort = targetUni?.name.replace('대학교', '대') || '대학';
+  const userUni = universities.find(u => u.id === user.universityId);
+  const userShort = userUni?.name.replace('대학교', '대') || '대학';
   const typeLabel = MEMBER_TYPE_SHORT[user.memberType] || '';
   const dept = user.department || '본인학과';
 
   return template
-    .replace(/\{\{prefix\}\}/g, `[${uniShort}][${typeLabel}]`)
-    .replace(/\{\{university\}\}/g, uniShort)
+    .replace(/\{\{prefix\}\}/g, `[${userShort}][${typeLabel}]`)
+    .replace(/\{\{university\}\}/g, targetShort)
     .replace(/\{\{department\}\}/g, dept)
     .replace(/\{\{memberType\}\}/g, typeLabel);
 }
@@ -87,6 +87,7 @@ function WritePageContent() {
   const [contactEmail, setContactEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const initialized = useRef(false);
+  const uniFromUrl = useRef(false);
 
   async function compressImage(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -166,6 +167,16 @@ function WritePageContent() {
       }
     }
 
+    // URL에서 대학교 파라미터 확인 (브레드크럼 기반 자동 선택)
+    const uniParam = params.get('uni');
+    if (uniParam) {
+      const uni = universities.find(u => u.slug === uniParam);
+      if (uni) {
+        setUniversityId(uni.id);
+        uniFromUrl.current = true;
+      }
+    }
+
     // URL에서 major/minor 카테고리 파라미터 확인 (카테고리 페이지에서 진입 시)
     const majorParam = params.get('major');
     if (majorParam) {
@@ -187,6 +198,12 @@ function WritePageContent() {
         }
         return;
       }
+    }
+
+    // uni 파라미터만 있는 경우 (대학교 페이지에서 진입)
+    if (uniFromUrl.current && !majorParam) {
+      initialized.current = true;
+      return;
     }
 
     // 새 글쓰기: 임시저장 불러오기
@@ -218,7 +235,9 @@ function WritePageContent() {
   // 사용자 대학교를 기본값으로 설정 + 제목 접두어 자동 삽입
   useEffect(() => {
     if (user && !isEditMode && !draftLoaded) {
-      setUniversityId(user.universityId);
+      if (!uniFromUrl.current) {
+        setUniversityId(user.universityId);
+      }
       if (!title) {
         const uni = universities.find(u => u.id === user.universityId);
         const uniShort = uni ? uni.name.replace('대학교', '대') : '';
@@ -259,29 +278,6 @@ function WritePageContent() {
   };
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-
-  // Step 전환 핸들러
-  const handleMajorSelect = (id: number) => {
-    setMajorId(id);
-    setMinorId(null);
-  };
-
-  const handleMajorContinue = () => {
-    setStep('minor');
-  };
-
-  const handleMinorSelect = (id: number) => {
-    setMinorId(id);
-  };
-
-  const handleMinorContinue = () => {
-    setStep('form');
-  };
-
-  const handleBackToMajor = () => {
-    setMinorId(null);
-    setStep('major');
-  };
 
   const handleChangeCategory = () => {
     setStep('major');
@@ -432,21 +428,10 @@ function WritePageContent() {
         </div>
       </div>
 
-      {/* Step 인디케이터 */}
-      {step !== 'form' && (
-        <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
-          <span className={step === 'major' ? 'font-bold text-foreground' : ''}>1. 대분류</span>
-          <span>&rsaquo;</span>
-          <span className={step === 'minor' ? 'font-bold text-foreground' : ''}>2. 소분류</span>
-          <span>&rsaquo;</span>
-          <span>3. 작성</span>
-        </div>
-      )}
-
       {/* 대학 선택 (모든 Step에서 표시) */}
       <div className="mt-4">
         <label className="mb-1.5 block text-sm font-medium">대학교</label>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {universities.map(uni => (
             <button
               key={uni.id}
@@ -462,27 +447,36 @@ function WritePageContent() {
       </div>
 
       <div className="mt-6">
-        {/* Step 1: 대분류 선택 */}
-        {step === 'major' && (
-          <CategoryStepMajor
-            selectedMajorId={majorId}
-            onSelect={handleMajorSelect}
-            onContinue={handleMajorContinue}
-          />
+        {/* 카테고리 통합 선택 (한 화면) */}
+        {step !== 'form' && (
+          <div>
+            <h2 className="text-lg font-bold">카테고리 선택</h2>
+            <p className="mt-1 text-sm text-muted-foreground">소분류를 클릭하면 바로 글쓰기로 이동합니다</p>
+            <div className="mt-3 columns-2 gap-4">
+              {getCategoryGroups().map(({ major, minors }) => (
+                <div key={major.id} className="mb-3 break-inside-avoid">
+                  <div className="flex items-center gap-1.5 py-1.5">
+                    <span className="cat-icon text-lg">{major.icon}</span>
+                    <span className="text-lg font-bold">{major.name}</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1 pb-1">
+                    {minors.map(minor => (
+                      <button
+                        key={minor.id}
+                        onClick={() => { setMajorId(major.id); setMinorId(minor.id); setStep('form'); }}
+                        className="rounded-md px-2 py-1 text-sm text-muted-foreground transition-colors hover:bg-blue-500/10 hover:text-blue-500"
+                      >
+                        {minor.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
 
-        {/* Step 2: 소분류 선택 */}
-        {step === 'minor' && majorId && (
-          <CategoryStepMinor
-            majorId={majorId}
-            selectedMinorId={minorId}
-            onSelect={handleMinorSelect}
-            onContinue={handleMinorContinue}
-            onBack={handleBackToMajor}
-          />
-        )}
-
-        {/* Step 3: 글쓰기 폼 */}
+        {/* 글쓰기 폼 */}
         {step === 'form' && (
           <div className="space-y-5">
             {/* 선택된 카테고리 요약 */}
