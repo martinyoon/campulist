@@ -409,7 +409,7 @@ export function createChatRoom(input: {
     otherUser: input.otherUser,
     lastMessage: input.autoMessage?.content ?? null,
     lastMessageAt: input.autoMessage ? now : null,
-    unreadCount: input.autoMessage ? 1 : 0,
+    unreadCount: 0, // 발신자 본인에게는 안 읽음 표시 안 함
     createdAt: now,
   };
 

@@ -3,10 +3,18 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { useToast } from '@/components/ui/Toast';
 import { bumpPost, findChatRoomByPost, createChatRoom } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import type { UserSummary } from '@/lib/types';
+
+const QUICK_MESSAGES = [
+  '구매 의사가 있습니다. 거래 가능한가요?',
+  '가격 네고 가능한가요?',
+  '직거래 장소와 시간이 어떻게 되나요?',
+];
 
 interface PostBottomActionProps {
   postId: string;
@@ -21,6 +29,9 @@ export default function PostBottomAction({ postId, postTitle, postPrice, postThu
   const { toast } = useToast();
   const { user } = useAuth();
   const [isOwner, setIsOwner] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [showInput, setShowInput] = useState(false);
+  const [customMsg, setCustomMsg] = useState('');
 
   useEffect(() => {
     setIsOwner(!!user && author.id === user.id);
@@ -43,6 +54,25 @@ export default function PostBottomAction({ postId, postTitle, postPrice, postThu
     );
   }
 
+  const sendMessage = (content: string) => {
+    if (!user || !content.trim()) return;
+
+    const room = createChatRoom({
+      postId,
+      postTitle,
+      postPrice,
+      postThumbnail,
+      otherUser: author,
+      autoMessage: {
+        senderId: user.id,
+        content: content.trim(),
+      },
+      buyerNickname: user.nickname,
+    });
+    setOpen(false);
+    router.push(`/chat/${room.id}`);
+  };
+
   // 타인 게시글: 채팅하기 버튼
   const handleChat = () => {
     if (!user) {
@@ -57,24 +87,61 @@ export default function PostBottomAction({ postId, postTitle, postPrice, postThu
       return;
     }
 
-    const room = createChatRoom({
-      postId,
-      postTitle,
-      postPrice,
-      postThumbnail,
-      otherUser: author,
-      autoMessage: {
-        senderId: user.id,
-        content: `안녕하세요! "${postTitle}" 게시글을 보고 연락드립니다. 구매 의사가 있습니다.`,
-      },
-      buyerNickname: user.nickname,
-    });
-    router.push(`/chat/${room.id}`);
+    setShowInput(false);
+    setCustomMsg('');
+    setOpen(true);
   };
 
   return (
-    <Button onClick={handleChat} className="bg-blue-600 px-8 text-white hover:bg-blue-700">
-      채팅하기
-    </Button>
+    <>
+      <Button onClick={handleChat} className="bg-blue-600 px-8 text-white hover:bg-blue-700">
+        채팅하기
+      </Button>
+
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetContent side="bottom" className="rounded-t-2xl" showCloseButton={false}>
+          <SheetHeader className="pb-2">
+            <SheetTitle className="text-lg">채팅 메시지 선택</SheetTitle>
+          </SheetHeader>
+          <div className="space-y-2 px-4 pb-6">
+            {QUICK_MESSAGES.map(msg => (
+              <button
+                key={msg}
+                onClick={() => sendMessage(msg)}
+                className="w-full rounded-lg border border-border px-4 py-3 text-left text-[15px] transition-colors hover:border-blue-500/50 hover:bg-blue-500/5"
+              >
+                {msg}
+              </button>
+            ))}
+
+            {!showInput ? (
+              <button
+                onClick={() => setShowInput(true)}
+                className="w-full rounded-lg border border-dashed border-border px-4 py-3 text-center text-[15px] text-muted-foreground transition-colors hover:border-blue-500/50 hover:text-foreground"
+              >
+                직접 입력하기
+              </button>
+            ) : (
+              <div className="flex gap-2">
+                <Input
+                  value={customMsg}
+                  onChange={e => setCustomMsg(e.target.value)}
+                  placeholder="메시지를 입력하세요"
+                  onKeyDown={e => { if (e.key === 'Enter' && customMsg.trim()) sendMessage(customMsg); }}
+                  autoFocus
+                />
+                <Button
+                  onClick={() => sendMessage(customMsg)}
+                  disabled={!customMsg.trim()}
+                  className="shrink-0 bg-blue-600 text-white hover:bg-blue-700"
+                >
+                  전송
+                </Button>
+              </div>
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
+    </>
   );
 }
