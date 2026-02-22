@@ -136,6 +136,7 @@ export interface ChatRoom {
   postTitle: string;
   postPrice: number | null;
   postThumbnail: string | null;
+  buyerId: string;
   otherUser: UserSummary;
   lastMessage: string | null;
   lastMessageAt: string | null;

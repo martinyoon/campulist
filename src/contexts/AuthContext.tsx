@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { getCurrentUserId, getFullUser, mockLogin, mockSignup, mockLogout } from '@/lib/auth';
+import { getCurrentUserId, getFullUser, mockLogin, mockSignup, mockLogout, mockDeleteAccount } from '@/lib/auth';
 import type { User, MemberType } from '@/lib/types';
 
 interface AuthContextType {
@@ -11,6 +11,7 @@ interface AuthContextType {
   login: (email: string, password: string) => { success: boolean; error?: string };
   signup: (data: { nickname: string; email: string; password: string; memberType: MemberType; universityId?: number }) => { success: boolean; error?: string };
   logout: () => void;
+  deleteAccount: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -54,8 +55,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.push('/auth');
   }, [router]);
 
+  const deleteAccount = useCallback(() => {
+    if (user) {
+      mockDeleteAccount(user.id);
+    }
+    setUser(null);
+    router.push('/');
+  }, [user, router]);
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, signup, logout, deleteAccount }}>
       {children}
     </AuthContext.Provider>
   );

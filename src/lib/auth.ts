@@ -180,3 +180,18 @@ export function mockSignup(data: SignupData): AuthResult {
 export function mockLogout() {
   localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
 }
+
+// ── 회원탈퇴 ──
+
+export function mockDeleteAccount(userId: string): void {
+  // REGISTERED_USERS에서 해당 유저 제거
+  const users = getRegisteredUsers().filter(u => u.id !== userId);
+  saveRegisteredUsers(users);
+
+  // 사용자 관련 localStorage 전부 삭제 (UI 설정 제외)
+  Object.values(STORAGE_KEYS).forEach(key => {
+    if (key !== STORAGE_KEYS.SHOW_ICONS) {
+      localStorage.removeItem(key);
+    }
+  });
+}

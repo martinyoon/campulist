@@ -9,7 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { getChatMessages } from '@/data/chats';
 import { useAuth } from '@/contexts/AuthContext';
 import AuthGuard from '@/components/auth/AuthGuard';
-import { getChatRoomById, clearChatUnread } from '@/lib/api';
+import { getChatRoomById, clearChatUnread, updateChatLastMessage } from '@/lib/api';
+import { getUserSummary } from '@/data/users';
 import { formatPrice } from '@/lib/format';
 import { STORAGE_KEYS } from '@/lib/constants';
 import type { ChatMessage } from '@/lib/types';
@@ -34,9 +35,14 @@ function ChatDetailContent() {
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // 상대방 정보: 내가 buyer면 otherUser(판매자), 내가 seller면 buyer 정보 조회
+  const partner = room
+    ? (room.buyerId === currentUserId ? room.otherUser : getUserSummary(room.buyerId))
+    : null;
+
   // 메시지 로드 (mock + localStorage) + 안읽음 초기화
   useEffect(() => {
-    if (room) document.title = `${room.otherUser.nickname} 채팅 | 캠퍼스리스트`;
+    if (partner) document.title = `${partner.nickname} 채팅 | 캠퍼스리스트`;
     clearChatUnread(roomId);
     const mockMessages = getChatMessages(roomId);
     try {
@@ -82,13 +88,14 @@ function ChatDetailContent() {
     setMessages(prev => [...prev, newMsg]);
     setInput('');
 
-    // localStorage에 저장
+    // localStorage에 저장 + 채팅방 마지막 메시지 갱신
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.CHAT_MESSAGES);
       const allSaved: ChatMessage[] = saved ? JSON.parse(saved) : [];
       allSaved.push(newMsg);
       localStorage.setItem(STORAGE_KEYS.CHAT_MESSAGES, JSON.stringify(allSaved));
     } catch { /* storage full */ }
+    updateChatLastMessage(roomId, text);
   };
 
   return (
@@ -99,15 +106,15 @@ function ChatDetailContent() {
           <button onClick={() => router.push('/chat')} className="text-muted-foreground hover:text-foreground" aria-label="뒤로가기">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m15 18-6-6 6-6" /></svg>
           </button>
-          <div className="min-w-0 flex-1">
+          <Link href={`/user/${partner!.id}`} className="min-w-0 flex-1 transition-opacity hover:opacity-70">
             <div className="flex items-center gap-2">
-              <span className="font-medium">{room.otherUser.nickname}</span>
-              {room.otherUser.isVerified && (
+              <span className="font-medium">{partner!.nickname}</span>
+              {partner!.isVerified && (
                 <Badge variant="secondary" className="h-4 px-1 text-[10px]">인증</Badge>
               )}
-              <span className="text-xs text-muted-foreground">{room.otherUser.mannerTemp}°C</span>
+              <span className="text-xs text-muted-foreground">{partner!.mannerTemp}°C</span>
             </div>
-          </div>
+          </Link>
         </div>
       </div>
 
@@ -142,12 +149,12 @@ function ChatDetailContent() {
                 <div className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
                   <div className={`flex max-w-[75%] items-end gap-1.5 ${isMine ? 'flex-row-reverse' : 'flex-row'}`}>
                     {!isMine && (
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium">
-                        {room.otherUser.nickname.charAt(0)}
-                      </div>
+                      <Link href={`/user/${partner!.id}`} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium transition-opacity hover:opacity-70">
+                        {partner!.nickname.charAt(0)}
+                      </Link>
                     )}
                     <div
-                      className={`rounded-2xl px-3.5 py-2 text-sm ${
+                      className={`whitespace-pre-line rounded-2xl px-3.5 py-2 text-sm ${
                         isMine
                           ? 'bg-blue-600 text-white'
                           : 'bg-muted text-foreground'

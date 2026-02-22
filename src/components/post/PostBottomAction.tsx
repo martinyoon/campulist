@@ -57,15 +57,19 @@ export default function PostBottomAction({ postId, postTitle, postPrice, postThu
   const sendMessage = (content: string) => {
     if (!user || !content.trim()) return;
 
+    // 첫 메시지에 게시글 제목을 포함하여 어떤 게시글 문의인지 명확히 함
+    const messageWithPost = `[${postTitle}]\n${content.trim()}`;
+
     const room = createChatRoom({
       postId,
       postTitle,
       postPrice,
       postThumbnail,
+      buyerId: user.id,
       otherUser: author,
       autoMessage: {
         senderId: user.id,
-        content: content.trim(),
+        content: messageWithPost,
       },
       buyerNickname: user.nickname,
     });
@@ -81,7 +85,7 @@ export default function PostBottomAction({ postId, postTitle, postPrice, postThu
       return;
     }
 
-    const existing = findChatRoomByPost(postId);
+    const existing = findChatRoomByPost(postId, user.id);
     if (existing) {
       router.push(`/chat/${existing.id}`);
       return;

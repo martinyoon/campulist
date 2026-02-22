@@ -349,7 +349,9 @@ function getLocalChatRooms(): ChatRoom[] {
   if (typeof window === 'undefined') return [];
   try {
     const saved = localStorage.getItem(STORAGE_KEYS.CHAT_ROOMS);
-    return saved ? JSON.parse(saved) : [];
+    const rooms: ChatRoom[] = saved ? JSON.parse(saved) : [];
+    // buyerId 없는 구 스키마 데이터 필터링
+    return rooms.filter(r => r.buyerId);
   } catch { return []; }
 }
 
@@ -382,12 +384,23 @@ export function getChatRoomById(roomId: string): ChatRoom | null {
   return getAllChatRooms().find(r => r.id === roomId) || null;
 }
 
-export function findChatRoomByPost(postId: string): ChatRoom | null {
-  return getAllChatRooms().find(r => r.postId === postId) || null;
+export function findChatRoomByPost(postId: string, buyerId: string): ChatRoom | null {
+  return getAllChatRooms().find(r =>
+    r.postId === postId && r.buyerId === buyerId
+  ) || null;
 }
 
-export function findChatRoomByUser(userId: string): ChatRoom | null {
-  return getAllChatRooms().find(r => r.otherUser.id === userId) || null;
+export function getMyChats(userId: string): ChatRoom[] {
+  return getAllChatRooms().filter(r =>
+    r.buyerId === userId || r.otherUser.id === userId
+  );
+}
+
+export function findChatRoomByUser(targetUserId: string, currentUserId: string): ChatRoom | null {
+  return getAllChatRooms().find(r =>
+    (r.otherUser.id === targetUserId && r.buyerId === currentUserId) ||
+    (r.buyerId === targetUserId && r.otherUser.id === currentUserId)
+  ) || null;
 }
 
 export function createChatRoom(input: {
@@ -395,6 +408,7 @@ export function createChatRoom(input: {
   postTitle: string;
   postPrice: number | null;
   postThumbnail: string | null;
+  buyerId: string;
   otherUser: UserSummary;
   autoMessage?: { senderId: string; content: string };
   buyerNickname?: string;
@@ -406,10 +420,11 @@ export function createChatRoom(input: {
     postTitle: input.postTitle,
     postPrice: input.postPrice,
     postThumbnail: input.postThumbnail,
+    buyerId: input.buyerId,
     otherUser: input.otherUser,
     lastMessage: input.autoMessage?.content ?? null,
     lastMessageAt: input.autoMessage ? now : null,
-    unreadCount: 0, // 발신자 본인에게는 안 읽음 표시 안 함
+    unreadCount: 0,
     createdAt: now,
   };
 
@@ -437,10 +452,8 @@ export function createChatRoom(input: {
       localStorage.setItem(STORAGE_KEYS.CHAT_MESSAGES, JSON.stringify(allSaved));
     } catch { /* storage full */ }
 
-    // 판매자에게 알림 생성
-    if (input.buyerNickname) {
-      createChatNotification(input.buyerNickname, input.postTitle);
-    }
+    // 알림은 Supabase 연동 시 서버에서 수신자에게만 전송
+    // localStorage 기반에서는 발신자 본인에게 알림이 오는 버그가 있어 비활성화
   }
 
   return room;
@@ -465,15 +478,26 @@ function createChatNotification(buyerNickname: string, postTitle: string): void 
   } catch { /* storage full */ }
 }
 
-// 채팅 안읽음 수 합산
-export function getUnreadChatCount(): number {
-  return getAllChatRooms().reduce((sum, r) => sum + r.unreadCount, 0);
+// 채팅 안읽음 수 합산 (현재 유저의 채팅방만)
+export function getUnreadChatCount(userId: string): number {
+  return getMyChats(userId).reduce((sum, r) => sum + r.unreadCount, 0);
 }
 
 // 채팅방 안읽음 초기화
 export function clearChatUnread(roomId: string): void {
   const overrides = getChatOverrides();
   overrides[roomId] = { ...overrides[roomId], unreadCount: 0 };
+  saveChatOverrides(overrides);
+}
+
+// 채팅방 마지막 메시지 갱신
+export function updateChatLastMessage(roomId: string, content: string): void {
+  const overrides = getChatOverrides();
+  overrides[roomId] = {
+    ...overrides[roomId],
+    lastMessage: content,
+    lastMessageAt: new Date().toISOString(),
+  };
   saveChatOverrides(overrides);
 }
 

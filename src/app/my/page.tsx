@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Input } from '@/components/ui/input';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import EmptyState from '@/components/ui/EmptyState';
 import { getMyPosts, getPostsByIds, getRecentViewedPosts } from '@/lib/api';
 import { formatPrice, formatRelativeTime } from '@/lib/format';
@@ -39,11 +41,13 @@ function getLikedPostIds(): string[] {
 function MyPageContent() {
   const router = useRouter();
   const { toast } = useToast();
-  const { user, logout } = useAuth();
+  const { user, logout, deleteAccount } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>('selling');
   const [myPosts, setMyPosts] = useState<PostListItem[]>([]);
   const [likedPosts, setLikedPosts] = useState<PostListItem[]>([]);
   const [recentPosts, setRecentPosts] = useState<PostListItem[]>([]);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [confirmText, setConfirmText] = useState('');
 
   useEffect(() => {
     document.title = '마이페이지 | 캠퍼스리스트';
@@ -125,7 +129,31 @@ function MyPageContent() {
         </div>
       </div>
 
-      <Separator />
+      {/* 메뉴 */}
+      <div className="border-b border-border py-1">
+        {[
+          { icon: '🔔', label: '알림 설정', href: '/notifications' },
+          { icon: 'ℹ️', label: '서비스 소개', href: '/about' },
+        ].map(item => (
+          <Link
+            key={item.label}
+            href={item.href}
+            className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted"
+          >
+            <span className="text-lg">{item.icon}</span>
+            <span className="flex-1 text-sm font-medium">{item.label}</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted-foreground"><path d="m9 18 6-6-6-6" /></svg>
+          </Link>
+        ))}
+        <button
+          onClick={() => { setDeleteOpen(true); setConfirmText(''); }}
+          className="flex w-full items-center gap-3 px-4 py-3 transition-colors hover:bg-destructive/5"
+        >
+          <span className="text-lg">⚠️</span>
+          <span className="flex-1 text-left text-sm font-medium text-destructive">회원탈퇴</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted-foreground"><path d="m9 18 6-6-6-6" /></svg>
+        </button>
+      </div>
 
       {/* 탭 바 */}
       <div className="flex border-b border-border">
@@ -279,25 +307,44 @@ function MyPageContent() {
         )}
       </div>
 
-      <Separator />
-
-      {/* 하단 메뉴 */}
-      <div className="py-2">
-        {[
-          { icon: '🔔', label: '알림 설정', href: '/notifications' },
-          { icon: 'ℹ️', label: '서비스 소개', href: '/about' },
-        ].map(item => (
-          <Link
-            key={item.label}
-            href={item.href}
-            className="flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-muted"
-          >
-            <span className="text-lg">{item.icon}</span>
-            <span className="flex-1 text-sm font-medium">{item.label}</span>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted-foreground"><path d="m9 18 6-6-6-6" /></svg>
-          </Link>
-        ))}
-      </div>
+      {/* 회원탈퇴 확인 Sheet */}
+      <Sheet open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <SheetContent side="bottom" className="rounded-t-2xl" showCloseButton={false}>
+          <SheetHeader className="pb-2">
+            <SheetTitle className="text-lg text-destructive">회원탈퇴</SheetTitle>
+          </SheetHeader>
+          <div className="space-y-4 px-4 pb-6">
+            <p className="text-sm text-muted-foreground">
+              탈퇴 시 모든 데이터가 삭제되며 복구할 수 없습니다.
+            </p>
+            <ul className="space-y-1 text-sm text-muted-foreground">
+              <li>• 작성한 게시글 및 채팅 내역</li>
+              <li>• 찜한 목록 및 검색 기록</li>
+              <li>• 알림 및 임시저장 데이터</li>
+            </ul>
+            <div>
+              <label className="mb-1.5 block text-sm font-medium">
+                확인을 위해 <span className="font-bold text-destructive">탈퇴합니다</span>를 입력하세요
+              </label>
+              <Input
+                value={confirmText}
+                onChange={e => setConfirmText(e.target.value)}
+                placeholder="탈퇴합니다"
+              />
+            </div>
+            <Button
+              onClick={() => {
+                deleteAccount();
+                toast('회원탈퇴가 완료되었습니다');
+              }}
+              disabled={confirmText !== '탈퇴합니다'}
+              className="w-full bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              회원탈퇴
+            </Button>
+          </div>
+        </SheetContent>
+      </Sheet>
 
     </div>
   );

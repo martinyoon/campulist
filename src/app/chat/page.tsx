@@ -3,25 +3,33 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
-import { getAllChatRooms } from '@/lib/api';
+import { getMyChats } from '@/lib/api';
+import { getUserSummary } from '@/data/users';
 import { formatRelativeTime } from '@/lib/format';
-import type { ChatRoom } from '@/lib/types';
+import type { ChatRoom, UserSummary } from '@/lib/types';
+import { useAuth } from '@/contexts/AuthContext';
 import AuthGuard from '@/components/auth/AuthGuard';
 
+function getChatPartner(chat: ChatRoom, myId: string): UserSummary {
+  if (chat.buyerId === myId) return chat.otherUser;
+  return getUserSummary(chat.buyerId);
+}
+
 function ChatPageContent() {
+  const { user } = useAuth();
   const [chats, setChats] = useState<ChatRoom[]>([]);
 
   useEffect(() => {
     document.title = '채팅 | 캠퍼스리스트';
-    const rooms = getAllChatRooms();
-    // 최신 메시지 순 정렬
+    if (!user) return;
+    const rooms = getMyChats(user.id);
     rooms.sort((a, b) => {
       const aTime = a.lastMessageAt || a.createdAt;
       const bTime = b.lastMessageAt || b.createdAt;
       return new Date(bTime).getTime() - new Date(aTime).getTime();
     });
     setChats(rooms);
-  }, []);
+  }, [user]);
 
   return (
     <div>
@@ -33,48 +41,51 @@ function ChatPageContent() {
       {/* 채팅 목록 */}
       {chats.length > 0 ? (
         <div>
-          {chats.map(chat => (
-            <Link
-              key={chat.id}
-              href={`/chat/${chat.id}`}
-              className="flex items-center gap-3 border-b border-border px-4 py-3.5 transition-colors hover:bg-muted"
-            >
-              {/* 상대방 아바타 */}
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-muted text-lg font-medium">
-                {chat.otherUser.nickname.charAt(0)}
-              </div>
-
-              {/* 채팅 내용 */}
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium">{chat.otherUser.nickname}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {chat.lastMessageAt ? formatRelativeTime(chat.lastMessageAt) : ''}
-                  </span>
+          {chats.map(chat => {
+            const partner = user ? getChatPartner(chat, user.id) : chat.otherUser;
+            return (
+              <Link
+                key={chat.id}
+                href={`/chat/${chat.id}`}
+                className="flex items-center gap-3 border-b border-border px-4 py-3.5 transition-colors hover:bg-muted"
+              >
+                {/* 상대방 아바타 */}
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-muted text-lg font-medium">
+                  {partner.nickname.charAt(0)}
                 </div>
-                <p className="truncate text-sm text-muted-foreground">
-                  {chat.lastMessage || '채팅을 시작해보세요'}
-                </p>
-                <p className="mt-0.5 truncate text-xs text-muted-foreground/70">{chat.postTitle}</p>
-              </div>
 
-              {/* 상품 썸네일 + 읽지 않은 수 */}
-              <div className="flex shrink-0 flex-col items-end gap-1">
-                {chat.postThumbnail && (
-                  <img
-                    src={chat.postThumbnail}
-                    alt={chat.postTitle}
-                    className="h-10 w-10 rounded-md object-cover"
-                  />
-                )}
-                {chat.unreadCount > 0 && (
-                  <Badge className="h-5 min-w-5 justify-center bg-blue-600 px-1.5 text-[10px] text-white">
-                    {chat.unreadCount}
-                  </Badge>
-                )}
-              </div>
-            </Link>
-          ))}
+                {/* 채팅 내용 */}
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">{partner.nickname}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {chat.lastMessageAt ? formatRelativeTime(chat.lastMessageAt) : ''}
+                    </span>
+                  </div>
+                  <p className="truncate text-sm text-muted-foreground">
+                    {chat.lastMessage || '채팅을 시작해보세요'}
+                  </p>
+                  <p className="mt-0.5 truncate text-xs text-muted-foreground/70">{chat.postTitle}</p>
+                </div>
+
+                {/* 상품 썸네일 + 읽지 않은 수 */}
+                <div className="flex shrink-0 flex-col items-end gap-1">
+                  {chat.postThumbnail && (
+                    <img
+                      src={chat.postThumbnail}
+                      alt={chat.postTitle}
+                      className="h-10 w-10 rounded-md object-cover"
+                    />
+                  )}
+                  {chat.unreadCount > 0 && (
+                    <Badge className="h-5 min-w-5 justify-center bg-blue-600 px-1.5 text-[10px] text-white">
+                      {chat.unreadCount}
+                    </Badge>
+                  )}
+                </div>
+              </Link>
+            );
+          })}
         </div>
       ) : (
         <div className="px-4 py-16 text-center text-muted-foreground">

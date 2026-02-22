@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { getUnreadChatCount } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 import { getWriteUrl } from '@/lib/writeUrl';
 
 const navItems = [
@@ -17,12 +18,13 @@ const navItems = [
 export default function BottomNav() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { user } = useAuth();
   const writeHref = getWriteUrl(pathname, searchParams.toString());
   const [chatUnread, setChatUnread] = useState(0);
 
   useEffect(() => {
-    setChatUnread(getUnreadChatCount());
-  }, [pathname]);
+    setChatUnread(user ? getUnreadChatCount(user.id) : 0);
+  }, [pathname, user]);
 
   return (
     <nav aria-label="하단 메뉴" className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background md:hidden">

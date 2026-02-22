@@ -18,7 +18,7 @@ export default function UserChatButton({ user: profileUser }: UserChatButtonProp
   if (!currentUser || profileUser.id === currentUser.id) return null;
 
   const handleChat = () => {
-    const existing = findChatRoomByUser(profileUser.id);
+    const existing = findChatRoomByUser(profileUser.id, currentUser.id);
     if (existing) {
       router.push(`/chat/${existing.id}`);
       return;
@@ -29,6 +29,7 @@ export default function UserChatButton({ user: profileUser }: UserChatButtonProp
       postTitle: `${profileUser.nickname}님과의 대화`,
       postPrice: null,
       postThumbnail: null,
+      buyerId: currentUser.id,
       otherUser: profileUser,
     });
     router.push(`/chat/${room.id}`);

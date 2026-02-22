@@ -24,7 +24,10 @@ export default function Header() {
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
-    setUnreadCount(getUnreadNotificationCount());
+    const update = () => setUnreadCount(getUnreadNotificationCount());
+    update();
+    window.addEventListener('notificationUpdate', update);
+    return () => window.removeEventListener('notificationUpdate', update);
   }, [pathname]);
 
   const handleSearch = (e: React.FormEvent) => {
