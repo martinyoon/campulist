@@ -57,19 +57,41 @@ export default async function AllCategoryPage({ params, searchParams }: Props) {
     return qs ? `${base}?${qs}` : base;
   };
 
+  const activeMinor = minorSlug ? minors.find(m => m.slug === minorSlug) : null;
+
   return (
     <div>
       <UniversityTabs />
 
+      {/* 모든 대학 컨텍스트 */}
+      <div className="bg-blue-950/30 px-4 py-2 dark:bg-blue-950/40">
+        <p className="text-sm">
+          <span className="font-bold text-blue-400 dark:text-blue-300">모든 대학</span>
+          <span className="ml-1.5 text-blue-500/70 dark:text-blue-400/70">전체 캠퍼스 통합</span>
+        </p>
+      </div>
+
       {/* 카테고리 헤더 */}
       <div className="border-b border-border px-4 py-4">
-        <div className="flex items-center gap-2">
-          <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">
+        <nav className="flex items-center gap-1.5 text-sm text-muted-foreground">
+          <Link href="/" className="hover:text-blue-500">
             모든 대학
           </Link>
-          <span className="text-sm text-muted-foreground/50">/</span>
-          <span className="text-sm font-medium">{category.icon} {category.name}</span>
-        </div>
+          <span>›</span>
+          {activeMinor ? (
+            <Link href={buildUrl({ minor: '' })} className="hover:text-blue-500">
+              {category.icon} {category.name}
+            </Link>
+          ) : (
+            <span className="font-medium text-foreground">{category.icon} {category.name}</span>
+          )}
+          {activeMinor && (
+            <>
+              <span>›</span>
+              <span className="font-medium text-foreground">{activeMinor.name}</span>
+            </>
+          )}
+        </nav>
         <div className="mt-1 flex items-center gap-2">
           <h1 className="text-xl font-bold">{category.icon} {category.name}</h1>
           <span className="text-sm text-muted-foreground">{posts.length}건</span>

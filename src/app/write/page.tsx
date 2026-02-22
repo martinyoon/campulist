@@ -11,6 +11,8 @@ import { useToast } from '@/components/ui/Toast';
 import { useAuth } from '@/contexts/AuthContext';
 import AuthGuard from '@/components/auth/AuthGuard';
 import { createPost, getPostForEdit, updatePost, deletePost } from '@/lib/api';
+import { getPostImages } from '@/data/posts';
+import { LIMITS } from '@/lib/constants';
 import type { PostStatus, MemberType } from '@/lib/types';
 import CategoryStepMajor from '@/components/write/CategoryStepMajor';
 import CategoryStepMinor from '@/components/write/CategoryStepMinor';
@@ -61,8 +63,46 @@ function WritePageContent() {
   const [editId, setEditId] = useState<string | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [postStatus, setPostStatus] = useState<PostStatus>('active');
+  const [images, setImages] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const initialized = useRef(false);
+
+  async function compressImage(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const img = new window.Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_DIM = 800;
+        let w = img.width;
+        let h = img.height;
+        if (w > MAX_DIM || h > MAX_DIM) {
+          if (w > h) { h = (h / w) * MAX_DIM; w = MAX_DIM; }
+          else { w = (w / h) * MAX_DIM; h = MAX_DIM; }
+        }
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext('2d')!.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.7));
+        URL.revokeObjectURL(img.src);
+      };
+      img.onerror = () => { URL.revokeObjectURL(img.src); reject(new Error('이미지 로드 실패')); };
+      img.src = URL.createObjectURL(file);
+    });
+  }
+
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    const remaining = LIMITS.MAX_IMAGES - images.length;
+    const selected = Array.from(files).slice(0, remaining);
+    try {
+      const compressed = await Promise.all(selected.map(compressImage));
+      setImages(prev => [...prev, ...compressed]);
+    } catch {
+      toast('일부 이미지를 처리할 수 없습니다.');
+    }
+    e.target.value = '';
+  };
 
   // 수정 모드 또는 임시저장 불러오기
   useEffect(() => {
@@ -90,6 +130,7 @@ function WritePageContent() {
         setTags(post.tags);
         setLocation(post.locationDetail || '');
         setPostStatus(post.status);
+        setImages(getPostImages(editParam));
         setStep('form');
         return;
       }
@@ -197,7 +238,7 @@ function WritePageContent() {
     clearDraft();
     setTitle(''); setBody(''); setPrice(''); setPriceNegotiable(false);
     setUniversityId(1); setMajorId(null); setMinorId(null);
-    setTags([]); setLocation(''); setDraftLoaded(false);
+    setTags([]); setLocation(''); setImages([]); setDraftLoaded(false);
     setStep('major');
   };
 
@@ -244,11 +285,11 @@ function WritePageContent() {
     };
 
     if (isEditMode && editId) {
-      updatePost(editId, { ...postData, tags, status: postStatus });
+      updatePost(editId, { ...postData, tags, images, status: postStatus });
       toast('게시글이 수정되었습니다!');
       router.push(`/post/${editId}`);
     } else {
-      const post = createPost({ ...postData, authorId: user!.id, tags });
+      const post = createPost({ ...postData, authorId: user!.id, tags, images });
       clearDraft();
       toast('게시글이 등록되었습니다!');
       router.push(`/post/${post.id}`);
@@ -446,16 +487,42 @@ function WritePageContent() {
               {errors.body && <p className="mt-1 text-xs text-red-500">{errors.body}</p>}
             </div>
 
-            {/* 이미지 (Phase B: Supabase Storage 연동 후 활성화) */}
+            {/* 이미지 */}
             <div>
-              <label className="mb-1.5 block text-sm font-medium">사진</label>
-              <div className="flex items-center gap-3">
-                <div className="flex h-20 w-20 flex-col items-center justify-center rounded-lg border-2 border-dashed border-border text-muted-foreground/50">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="m21 15-5-5L5 21" /></svg>
-                  <span className="mt-1 text-[10px]">0/10</span>
-                </div>
-                <p className="text-xs text-muted-foreground">사진 업로드는 정식 버전에서 지원됩니다.</p>
+              <label className="mb-1.5 block text-sm font-medium">사진 (최대 {LIMITS.MAX_IMAGES}장)</label>
+              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                {images.map((src, i) => (
+                  <div key={i} className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-border">
+                    <img src={src} alt="" className="h-full w-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => setImages(images.filter((_, j) => j !== i))}
+                      className="absolute right-0.5 top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-[10px] text-white hover:bg-black/80"
+                    >
+                      &times;
+                    </button>
+                    {i === 0 && (
+                      <span className="absolute bottom-0 left-0 right-0 bg-blue-600/80 py-0.5 text-center text-[9px] font-medium text-white">대표</span>
+                    )}
+                  </div>
+                ))}
+                {images.length < LIMITS.MAX_IMAGES && (
+                  <label className="flex h-20 w-20 shrink-0 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-border text-muted-foreground transition-colors hover:border-blue-500 hover:text-blue-500">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="m21 15-5-5L5 21" /></svg>
+                    <span className="mt-1 text-[10px]">{images.length}/{LIMITS.MAX_IMAGES}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      className="hidden"
+                      onChange={handleImageSelect}
+                    />
+                  </label>
+                )}
               </div>
+              {images.length === 0 && (
+                <p className="mt-1 text-xs text-muted-foreground">사진을 추가하면 관심을 더 많이 받을 수 있어요.</p>
+              )}
             </div>
 
             {/* 태그 */}

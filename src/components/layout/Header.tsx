@@ -44,17 +44,22 @@ export default function Header() {
           <SheetContent side="left" className="w-72">
             <nav className="mt-8 flex flex-col gap-4">
               <p className="text-sm font-semibold text-muted-foreground">대학교</p>
-              {universities.map(uni => (
-                <Link key={uni.slug} href={`/${uni.slug}`} className="text-base hover:text-blue-500">
-                  {uni.name}
-                </Link>
-              ))}
+              {universities.map(uni => {
+                const isActive = pathname.startsWith(`/${uni.slug}`);
+                return (
+                  <Link key={uni.slug} href={`/${uni.slug}`} className={`text-base ${isActive ? 'font-bold text-blue-500' : 'hover:text-blue-500'}`}>
+                    {uni.name}
+                  </Link>
+                );
+              })}
               <div className="my-2 border-t border-border" />
               <p className="text-sm font-semibold text-muted-foreground">카테고리</p>
               {majorCategories.map(cat => {
                 const uniSlug = universities.find(u => pathname.startsWith(`/${u.slug}`))?.slug;
+                const catHref = uniSlug ? `/${uniSlug}/${cat.slug}` : `/all/${cat.slug}`;
+                const isActive = pathname.startsWith(catHref);
                 return (
-                  <Link key={cat.slug} href={uniSlug ? `/${uniSlug}/${cat.slug}` : `/all/${cat.slug}`} className="text-base hover:text-blue-500">
+                  <Link key={cat.slug} href={catHref} className={`text-base ${isActive ? 'font-bold text-blue-500' : 'hover:text-blue-500'}`}>
                     {cat.icon} {cat.name}
                   </Link>
                 );

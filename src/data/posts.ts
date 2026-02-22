@@ -73,8 +73,13 @@ export const mockPosts: Post[] = [
   // ===== KAIST 커뮤니티 =====
   { id: 'p37', title: 'ICPC 스터디 모집 (알고리즘 대회)', body: 'ACM-ICPC 대비 알고리즘 스터디. 주 2회 모여서 문제풀이. Codeforces 1600+ 수준.', authorId: 'u9', universityId: 4, categoryMajorId: 4, categoryMinorId: 41, price: null, priceNegotiable: false, isPremium: false, status: 'active', locationDetail: 'KAIST 팩토리', viewCount: 78, likeCount: 12, bumpedAt: '2026-02-20T06:00:00Z', createdAt: '2026-02-19T10:00:00Z', updatedAt: '2026-02-19T10:00:00Z' },
 
-  // ===== KAIST 캠퍼스 비즈니스 =====
+  // ===== KAIST 캠퍼스라이프 =====
   { id: 'p38', title: '[학생할인] 대전 맛집왕 추천 맛집 10% 할인', body: '대전 유성구 맛집 10곳 제휴! 학생증 제시 시 10% 할인. 성심당, 궁중해장국 등.', authorId: 'u11', universityId: 4, categoryMajorId: 6, categoryMinorId: 62, price: null, priceNegotiable: false, isPremium: false, status: 'active', locationDetail: '대전 유성구 일대', viewCount: 345, likeCount: 56, bumpedAt: '2026-02-20T11:00:00Z', createdAt: '2026-02-14T08:00:00Z', updatedAt: '2026-02-14T08:00:00Z' },
+
+  // ===== 긱·의뢰 =====
+  { id: 'p39', title: '졸업논문 영문교정 의뢰 (5000단어)', body: '경영학과 졸업논문 영문교정 부탁드립니다. 학술논문 형식. 2/28까지 완료 희망. 단가 협의.', authorId: 'u1', universityId: 1, categoryMajorId: 7, categoryMinorId: 72, price: 80000, priceNegotiable: true, isPremium: false, status: 'active', locationDetail: null, viewCount: 34, likeCount: 2, bumpedAt: '2026-02-21T09:00:00Z', createdAt: '2026-02-21T09:00:00Z', updatedAt: '2026-02-21T09:00:00Z' },
+  { id: 'p40', title: '[급구] 팀프로젝트 발표 PPT 디자인', body: '3/3 발표용 PPT 20장 디자인 의뢰합니다. 깔끔한 비즈니스 스타일. 내용은 제공합니다.', authorId: 'u6', universityId: 2, categoryMajorId: 7, categoryMinorId: 73, price: 50000, priceNegotiable: false, isPremium: false, status: 'active', locationDetail: null, viewCount: 21, likeCount: 1, bumpedAt: '2026-02-21T07:00:00Z', createdAt: '2026-02-21T07:00:00Z', updatedAt: '2026-02-21T07:00:00Z' },
+  { id: 'p41', title: '설문조사 참여자 모집 (소정의 사례)', body: 'UX 연구 관련 설문 (약 10분 소요). 참여 시 커피 쿠폰 증정. 대학생 누구나 참여 가능.', authorId: 'u9', universityId: 4, categoryMajorId: 7, categoryMinorId: 75, price: null, priceNegotiable: false, isPremium: false, status: 'active', locationDetail: 'KAIST 캠퍼스 내', viewCount: 67, likeCount: 8, bumpedAt: '2026-02-20T15:00:00Z', createdAt: '2026-02-20T15:00:00Z', updatedAt: '2026-02-20T15:00:00Z' },
 ];
 
 const postImages: Record<string, string[]> = {
@@ -114,7 +119,14 @@ const postTags: Record<string, string[]> = {
 };
 
 export function getPostImages(postId: string): string[] {
-  return postImages[postId] || [];
+  if (postImages[postId]) return postImages[postId];
+  // localStorage에서 로컬 게시글 이미지 조회
+  if (typeof window === 'undefined') return [];
+  try {
+    const saved = localStorage.getItem('campulist_post_images');
+    const allImages: Record<string, string[]> = saved ? JSON.parse(saved) : {};
+    return allImages[postId] || [];
+  } catch { return []; }
 }
 
 export function getPostTags(postId: string): string[] {

@@ -207,6 +207,7 @@ export function updatePost(postId: string, input: {
   priceNegotiable: boolean;
   locationDetail: string | null;
   tags?: string[];
+  images?: string[];
   status?: PostStatus;
 }): void {
   const now = new Date().toISOString();
@@ -215,13 +216,13 @@ export function updatePost(postId: string, input: {
     const localPosts = getLocalPosts();
     const idx = localPosts.findIndex(p => p.id === postId);
     if (idx >= 0) {
-      const { tags: _tags, ...postInput } = input;
+      const { tags: _tags, images: _images, ...postInput } = input;
       localPosts[idx] = { ...localPosts[idx], ...postInput, updatedAt: now };
       localStorage.setItem(STORAGE_KEYS.USER_POSTS, JSON.stringify(localPosts));
     }
   } else {
     // mock 게시글: 오버라이드
-    const { tags: _tags, ...postInput } = input;
+    const { tags: _tags, images: _images, ...postInput } = input;
     const overrides = getPostOverrides();
     overrides[postId] = { ...overrides[postId], ...postInput, updatedAt: now };
     savePostOverrides(overrides);
@@ -234,6 +235,16 @@ export function updatePost(postId: string, input: {
       const allTags: Record<string, string[]> = savedTags ? JSON.parse(savedTags) : {};
       allTags[postId] = input.tags;
       localStorage.setItem(STORAGE_KEYS.POST_TAGS, JSON.stringify(allTags));
+    } catch { /* storage full */ }
+  }
+
+  // 이미지 저장
+  if (input.images) {
+    try {
+      const savedImages = localStorage.getItem(STORAGE_KEYS.POST_IMAGES);
+      const allImages: Record<string, string[]> = savedImages ? JSON.parse(savedImages) : {};
+      allImages[postId] = input.images;
+      localStorage.setItem(STORAGE_KEYS.POST_IMAGES, JSON.stringify(allImages));
     } catch { /* storage full */ }
   }
 }
@@ -263,6 +274,7 @@ export function createPost(input: {
   priceNegotiable: boolean;
   locationDetail: string | null;
   tags: string[];
+  images?: string[];
 }): Post {
   const now = new Date().toISOString();
   const post: Post = {
@@ -298,6 +310,16 @@ export function createPost(input: {
       const allTags: Record<string, string[]> = savedTags ? JSON.parse(savedTags) : {};
       allTags[post.id] = input.tags;
       localStorage.setItem(STORAGE_KEYS.POST_TAGS, JSON.stringify(allTags));
+    } catch { /* storage full */ }
+  }
+
+  // 이미지 저장
+  if (input.images && input.images.length > 0) {
+    try {
+      const savedImages = localStorage.getItem(STORAGE_KEYS.POST_IMAGES);
+      const allImages: Record<string, string[]> = savedImages ? JSON.parse(savedImages) : {};
+      allImages[post.id] = input.images;
+      localStorage.setItem(STORAGE_KEYS.POST_IMAGES, JSON.stringify(allImages));
     } catch { /* storage full */ }
   }
 

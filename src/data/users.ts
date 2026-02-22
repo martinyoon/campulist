@@ -16,15 +16,35 @@ export const mockUsers: User[] = [
 
 export function getUserSummary(userId: string): UserSummary {
   const user = mockUsers.find(u => u.id === userId);
-  if (!user) {
-    return { id: userId, nickname: '알 수 없음', avatarUrl: null, isVerified: false, mannerTemp: 36.5, tradeCount: 0 };
+  if (user) {
+    return {
+      id: user.id,
+      nickname: user.nickname,
+      avatarUrl: user.avatarUrl,
+      isVerified: user.isVerified,
+      mannerTemp: user.mannerTemp,
+      tradeCount: user.tradeCount,
+    };
   }
-  return {
-    id: user.id,
-    nickname: user.nickname,
-    avatarUrl: user.avatarUrl,
-    isVerified: user.isVerified,
-    mannerTemp: user.mannerTemp,
-    tradeCount: user.tradeCount,
-  };
+
+  // localStorage 가입유저에서 찾기
+  if (typeof window !== 'undefined') {
+    try {
+      const registered: Array<{ id: string; email: string; nickname: string }> =
+        JSON.parse(localStorage.getItem('campulist_registered_users') || '[]');
+      const regUser = registered.find(u => u.id === userId);
+      if (regUser) {
+        return {
+          id: regUser.id,
+          nickname: regUser.nickname,
+          avatarUrl: null,
+          isVerified: regUser.email?.endsWith('.ac.kr') ?? false,
+          mannerTemp: 36.5,
+          tradeCount: 0,
+        };
+      }
+    } catch { /* ignore */ }
+  }
+
+  return { id: userId, nickname: '알 수 없음', avatarUrl: null, isVerified: false, mannerTemp: 36.5, tradeCount: 0 };
 }
