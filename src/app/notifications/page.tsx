@@ -35,16 +35,28 @@ function saveReadIds(ids: string[]): void {
   } catch { /* ignore */ }
 }
 
+function getLocalNotifications(): Notification[] {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEYS.NOTIFICATIONS);
+    return saved ? JSON.parse(saved) : [];
+  } catch { return []; }
+}
+
 export default function NotificationsPage() {
   const [readIds, setReadIds] = useState<string[]>([]);
+  const [allNotifications, setAllNotifications] = useState<Notification[]>([]);
 
   useEffect(() => {
     document.title = '알림 | 캠퍼스리스트';
     setReadIds(getReadIds());
+    // mock + localStorage 알림 통합, 최신순 정렬
+    const merged = [...mockNotifications, ...getLocalNotifications()]
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    setAllNotifications(merged);
   }, []);
 
   const isRead = (notif: Notification) => notif.isRead || readIds.includes(notif.id);
-  const unreadCount = mockNotifications.filter(n => !isRead(n)).length;
+  const unreadCount = allNotifications.filter(n => !isRead(n)).length;
 
   const markAsRead = (id: string) => {
     if (readIds.includes(id)) return;
@@ -54,7 +66,7 @@ export default function NotificationsPage() {
   };
 
   const markAllAsRead = () => {
-    const allIds = mockNotifications.map(n => n.id);
+    const allIds = allNotifications.map(n => n.id);
     setReadIds(allIds);
     saveReadIds(allIds);
   };
@@ -80,14 +92,14 @@ export default function NotificationsPage() {
 
       <Separator />
 
-      {mockNotifications.length === 0 ? (
+      {allNotifications.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
           <p className="mt-3 text-sm">알림이 없습니다</p>
         </div>
       ) : (
         <div>
-          {mockNotifications.map(notif => {
+          {allNotifications.map(notif => {
             const read = isRead(notif);
             return (
               <Link
