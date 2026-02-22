@@ -49,46 +49,47 @@ export default function CategoryDirectory({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="max-h-[85vh] overflow-hidden rounded-t-2xl">
+      <SheetContent side="bottom" className="max-h-[75vh] overflow-hidden rounded-t-2xl">
         <SheetHeader className="pb-0">
           <SheetTitle className="text-lg">카테고리 전체보기</SheetTitle>
         </SheetHeader>
 
-        <div className="overflow-y-auto px-4 pb-6 sm:columns-2 sm:gap-4">
-          {groups.map(({ major, minors }) => {
+        <div className="columns-2 gap-4 overflow-y-auto px-4 pb-4">
+          {groups.map(({ major, minors }, idx) => {
             const isActive = major.id === activeMajorId;
             return (
               <div
                 key={major.id}
                 ref={isActive ? activeRef : undefined}
-                className={`mb-4 break-inside-avoid rounded-xl border p-3.5 ${
-                  isActive
-                    ? 'border-blue-500 bg-blue-500/5'
-                    : 'border-border'
-                }`}
+                className="mb-1 break-inside-avoid"
               >
                 {/* 대분류 헤더 */}
                 <button
                   onClick={() => handleMajorClick(major.slug)}
-                  className="flex w-full items-center gap-2 text-left transition-colors hover:text-blue-500"
+                  className={`flex w-full items-center gap-1.5 py-2 text-left transition-colors hover:text-blue-500 ${
+                    isActive ? 'text-blue-500' : ''
+                  }`}
                 >
-                  <span className="cat-icon text-xl">{major.icon}</span>
-                  <span className="text-[15px] font-bold">{major.name}</span>
-                  <span className="ml-auto text-xs text-muted-foreground">전체보기 ›</span>
+                  <span className="cat-icon text-base">{major.icon}</span>
+                  <span className="text-[13px] font-bold">{major.name}</span>
+                  <span className="ml-auto text-[11px] text-muted-foreground">전체 ›</span>
                 </button>
 
                 {/* 소분류 목록 */}
-                <div className="mt-2.5 grid grid-cols-2 gap-x-2 gap-y-1">
+                <div className="flex flex-wrap gap-1 pb-2">
                   {minors.map(minor => (
                     <button
                       key={minor.id}
                       onClick={() => handleMinorClick(major.slug, minor.slug)}
-                      className="rounded-md px-2 py-1.5 text-left text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                      className="rounded-md px-1.5 py-0.5 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                     >
-                      <span className="cat-icon">{minor.icon} </span>{minor.name}
+                      {minor.name}
                     </button>
                   ))}
                 </div>
+
+                {/* 구분선 (마지막 제외) */}
+                {idx < groups.length - 1 && <div className="border-b border-border" />}
               </div>
             );
           })}
