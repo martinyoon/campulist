@@ -6,6 +6,7 @@ import ThemeProvider from "@/components/ThemeProvider";
 import Header from "@/components/layout/Header";
 import BottomNav from "@/components/layout/BottomNav";
 import ScrollToTop from "@/components/layout/ScrollToTop";
+import ScrollRestoration from "@/components/layout/ScrollRestoration";
 import { ToastProvider } from "@/components/ui/Toast";
 import { AuthProvider } from "@/contexts/AuthContext";
 
@@ -39,6 +40,7 @@ export default function RootLayout({
               <Suspense>
                 <BottomNav />
               </Suspense>
+              <ScrollRestoration />
               <ScrollToTop />
             </ToastProvider>
           </AuthProvider>

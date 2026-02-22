@@ -48,7 +48,7 @@ export default function BottomNav() {
                   {chatUnread > 99 ? '99+' : chatUnread}
                 </span>
               )}
-              <span className="text-[10px]">{item.label}</span>
+              <span className="text-[11px] font-medium">{item.label}</span>
             </Link>
           );
         })}
