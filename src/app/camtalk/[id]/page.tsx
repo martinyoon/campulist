@@ -47,10 +47,12 @@ function CamTalkDetailContent() {
   const room = getRoom(roomId);
   const partner = room?.participants.find(p => p.id !== myId) ?? null;
   const partnerProfile = partner ? getUserSummary(partner.id) : null;
+  const partnerNickname = partnerProfile?.nickname ?? partner?.nickname ?? '';
+  const myNickname = user?.nickname ?? '';
 
   // 메시지 로드 + 읽음 처리 (roomId와 myId만 의존)
   useEffect(() => {
-    if (partner) document.title = `${partner.nickname} 캠톡 | 캠퍼스리스트`;
+    if (partnerNickname) document.title = `${partnerNickname} 캠톡 | 캠퍼스리스트`;
     markRead(roomId, myId);
     setMessages(getMessages(roomId));
   }, [roomId, myId]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -89,7 +91,7 @@ function CamTalkDetailContent() {
           </button>
           <Link href={`/user/${partner.id}`} className="min-w-0 flex-1 transition-opacity hover:opacity-70">
             <div className="flex items-center gap-2">
-              <span className="font-medium">{partner.nickname}</span>
+              <span className="font-medium">{partnerNickname}</span>
               {partnerProfile?.isVerified && (
                 <Badge variant="secondary" className="h-4 px-1 text-[10px]">인증</Badge>
               )}
@@ -103,26 +105,47 @@ function CamTalkDetailContent() {
 
       {/* 메시지 영역 */}
       <div className="flex-1 overflow-y-auto px-4 py-4">
-        <div className="space-y-3">
+        <div className="flex flex-col gap-1">
           {messages.map((msg, i) => {
             const isMine = msg.senderId === myId;
             const showDate = i === 0 || new Date(msg.createdAt).toDateString() !== new Date(messages[i - 1].createdAt).toDateString();
+            const prevMsg = i > 0 ? messages[i - 1] : null;
+            const isFirstInGroup = !prevMsg || prevMsg.senderId !== msg.senderId || showDate;
 
             return (
-              <div key={msg.id}>
+              <div key={msg.id} className={isFirstInGroup && i > 0 ? 'mt-3' : ''}>
                 {showDate && (
                   <div className="my-4 text-center text-xs text-muted-foreground">
                     {new Date(msg.createdAt).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' })}
                   </div>
                 )}
+
+                {/* 닉네임 라벨 — 그룹 첫 메시지만 */}
+                {isFirstInGroup && (
+                  <div className={`mb-1 ${isMine ? 'text-right' : 'pl-9'}`}>
+                    {isMine ? (
+                      <span className="text-xs font-medium text-muted-foreground">{myNickname}</span>
+                    ) : (
+                      <Link href={`/user/${partner.id}`} className="text-xs font-medium text-foreground/70 hover:text-foreground">
+                        {partnerNickname}
+                      </Link>
+                    )}
+                  </div>
+                )}
+
                 <div className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
                   <div className={`flex max-w-[75%] items-end gap-1.5 ${isMine ? 'flex-row-reverse' : 'flex-row'}`}>
+                    {/* 상대방 아바타: 그룹 첫 메시지만, 나머지는 빈 공간 */}
                     {!isMine && (
-                      <Link href={`/user/${partner.id}`} className="transition-opacity hover:opacity-70">
-                        <Avatar size="sm">
-                          <AvatarFallback>{partner.nickname.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                      </Link>
+                      isFirstInGroup ? (
+                        <Link href={`/user/${partner.id}`} className="shrink-0 self-start transition-opacity hover:opacity-70">
+                          <Avatar size="sm">
+                            <AvatarFallback>{partnerNickname.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                        </Link>
+                      ) : (
+                        <span className="w-7 shrink-0" />
+                      )
                     )}
                     <div
                       className={`whitespace-pre-line rounded-2xl px-3.5 py-2 text-sm ${
