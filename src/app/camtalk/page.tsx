@@ -8,6 +8,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import { getMyRooms } from '@/lib/camtalk';
 import type { CamTalkRoom } from '@/lib/camtalk';
 import { formatRelativeTime } from '@/lib/format';
+import { getUserSummary } from '@/data/users';
 import { useAuth } from '@/contexts/AuthContext';
 import AuthGuard from '@/components/auth/AuthGuard';
 
@@ -44,6 +45,8 @@ function CamTalkContent() {
           {rooms.map(room => {
             const partner = room.participants.find(p => p.id !== userId);
             if (!partner) return null;
+            const partnerProfile = getUserSummary(partner.id);
+            const displayNickname = partnerProfile.nickname !== '알 수 없음' ? partnerProfile.nickname : partner.nickname;
             const myUnread = room.unread[userId] || 0;
 
             return (
@@ -53,12 +56,12 @@ function CamTalkContent() {
                 className="flex items-center gap-3 border-b border-border px-4 py-3.5 transition-colors hover:bg-muted"
               >
                 <Avatar className="size-12">
-                  <AvatarFallback className="text-lg">{partner.nickname.charAt(0)}</AvatarFallback>
+                  <AvatarFallback className="text-lg">{displayNickname.charAt(0)}</AvatarFallback>
                 </Avatar>
 
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium">{partner.nickname}</span>
+                    <span className="font-medium">{displayNickname}</span>
                     <span className="text-xs text-muted-foreground">
                       {room.lastMessageAt ? formatRelativeTime(room.lastMessageAt) : ''}
                     </span>

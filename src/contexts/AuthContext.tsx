@@ -2,7 +2,8 @@
 
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { getCurrentUserId, getFullUser, mockLogin, mockSignup, mockLogout, mockDeleteAccount } from '@/lib/auth';
+import { getCurrentUserId, getFullUser, mockLogin, mockSignup, mockLogout, mockDeleteAccount, mockUpdateProfile } from '@/lib/auth';
+import type { ProfileUpdateData } from '@/lib/auth';
 import type { User, MemberType } from '@/lib/types';
 
 interface AuthContextType {
@@ -12,6 +13,7 @@ interface AuthContextType {
   signup: (data: { nickname: string; email: string; password: string; memberType: MemberType; universityId?: number }) => { success: boolean; error?: string };
   logout: () => void;
   deleteAccount: () => void;
+  updateProfile: (data: ProfileUpdateData) => { success: boolean; error?: string };
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -55,6 +57,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.push('/auth');
   }, [router]);
 
+  const updateProfile = useCallback((data: ProfileUpdateData) => {
+    if (!user) return { success: false, error: '로그인이 필요합니다' };
+    const result = mockUpdateProfile(user.id, data);
+    if (result.success) {
+      const updated = getFullUser(user.id);
+      setUser(updated);
+    }
+    return result;
+  }, [user]);
+
   const deleteAccount = useCallback(() => {
     if (user) {
       mockDeleteAccount(user.id);
@@ -64,7 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [user, router]);
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, signup, logout, deleteAccount }}>
+    <AuthContext.Provider value={{ user, isLoading, login, signup, logout, deleteAccount, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );

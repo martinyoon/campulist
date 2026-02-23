@@ -16,6 +16,7 @@ export const STORAGE_KEYS = {
   REGISTERED_USERS: 'campulist_registered_users',
   POST_IMAGES: 'campulist_post_images',
   SHOW_ICONS: 'campulist_show_icons',
+  PROFILE_OVERRIDES: 'campulist_profile_overrides',
 } as const;
 
 export const LIMITS = {

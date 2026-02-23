@@ -41,13 +41,18 @@ function getLikedPostIds(): string[] {
 function MyPageContent() {
   const router = useRouter();
   const { toast } = useToast();
-  const { user, logout, deleteAccount } = useAuth();
+  const { user, logout, deleteAccount, updateProfile } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>('selling');
   const [myPosts, setMyPosts] = useState<PostListItem[]>([]);
   const [likedPosts, setLikedPosts] = useState<PostListItem[]>([]);
   const [recentPosts, setRecentPosts] = useState<PostListItem[]>([]);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [confirmText, setConfirmText] = useState('');
+  const [editOpen, setEditOpen] = useState(false);
+  const [editNickname, setEditNickname] = useState('');
+  const [editDepartment, setEditDepartment] = useState('');
+  const [editMemberType, setEditMemberType] = useState<MemberType>('undergraduate');
+  const [editError, setEditError] = useState('');
 
   useEffect(() => {
     document.title = '마이페이지 | 캠퍼스리스트';
@@ -109,6 +114,19 @@ function MyPageContent() {
             >
               로그아웃
             </button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setEditNickname(user.nickname);
+                setEditDepartment(user.department ?? '');
+                setEditMemberType(user.memberType);
+                setEditError('');
+                setEditOpen(true);
+              }}
+            >
+              수정
+            </Button>
             <Link href={`/user/${user.id}`}>
               <Button variant="outline" size="sm">프로필</Button>
             </Link>
@@ -306,6 +324,73 @@ function MyPageContent() {
           )
         )}
       </div>
+
+      {/* 프로필 수정 Sheet */}
+      <Sheet open={editOpen} onOpenChange={setEditOpen}>
+        <SheetContent side="bottom" className="rounded-t-2xl" showCloseButton={false}>
+          <SheetHeader className="pb-2">
+            <SheetTitle className="text-lg">프로필 수정</SheetTitle>
+          </SheetHeader>
+          <div className="space-y-4 px-4 pb-6">
+            <div>
+              <label className="mb-1.5 block text-sm font-medium">닉네임</label>
+              <Input
+                value={editNickname}
+                onChange={e => { setEditNickname(e.target.value); setEditError(''); }}
+                placeholder="닉네임을 입력하세요"
+              />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-sm font-medium">학과</label>
+              <Input
+                value={editDepartment}
+                onChange={e => setEditDepartment(e.target.value)}
+                placeholder="학과를 입력하세요"
+              />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-sm font-medium">회원 유형</label>
+              <div className="flex flex-wrap gap-2">
+                {(Object.entries(MEMBER_TYPE_LABELS) as [MemberType, string][]).map(([value, label]) => (
+                  <button
+                    key={value}
+                    onClick={() => setEditMemberType(value)}
+                    className={`rounded-lg border px-3 py-2 text-sm transition-colors ${
+                      editMemberType === value
+                        ? 'border-blue-500 bg-blue-500/10 font-medium text-blue-600'
+                        : 'border-border text-muted-foreground hover:border-blue-500/50'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {editError && (
+              <p className="text-sm text-destructive">{editError}</p>
+            )}
+            <Button
+              onClick={() => {
+                const result = updateProfile({
+                  nickname: editNickname.trim(),
+                  department: editDepartment.trim() || null,
+                  memberType: editMemberType,
+                });
+                if (result.success) {
+                  toast('프로필이 수정되었습니다');
+                  setEditOpen(false);
+                } else {
+                  setEditError(result.error ?? '수정에 실패했습니다');
+                }
+              }}
+              disabled={!editNickname.trim()}
+              className="w-full bg-blue-600 text-white hover:bg-blue-700"
+            >
+              저장
+            </Button>
+          </div>
+        </SheetContent>
+      </Sheet>
 
       {/* 회원탈퇴 확인 Sheet */}
       <Sheet open={deleteOpen} onOpenChange={setDeleteOpen}>

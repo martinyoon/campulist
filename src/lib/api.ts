@@ -123,7 +123,7 @@ export async function getPostDetail(postId: string): Promise<PostDetail | null> 
     categoryMinor: { id: minor.id, name: minor.name, slug: minor.slug },
     images: getPostImages(post.id),
     tags: getPostTags(post.id),
-    isLiked: false,
+    isLiked: getLikedPostIds().includes(postId),
   };
 }
 
@@ -341,6 +341,37 @@ export function bumpPost(postId: string): void {
   const overrides = getPostOverrides();
   overrides[postId] = { ...overrides[postId], bumpedAt: now, updatedAt: now };
   savePostOverrides(overrides);
+}
+
+// A3: 찜한 게시글 ID 목록 조회
+export function getLikedPostIds(): string[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.LIKED_POSTS) || '[]');
+  } catch { return []; }
+}
+
+// A4: 찜 토글 (likeCount ±1 + LIKED_POSTS 배열 업데이트)
+export function toggleLike(postId: string): { liked: boolean; count: number } {
+  const likedPosts = getLikedPostIds();
+  const isCurrentlyLiked = likedPosts.includes(postId);
+
+  // LIKED_POSTS 배열 업데이트
+  const updatedIds = isCurrentlyLiked
+    ? likedPosts.filter(id => id !== postId)
+    : [...likedPosts, postId];
+  localStorage.setItem(STORAGE_KEYS.LIKED_POSTS, JSON.stringify(updatedIds));
+
+  // likeCount 오버라이드 저장
+  const post = getAllPosts().find(p => p.id === postId);
+  const currentCount = post?.likeCount ?? 0;
+  const newCount = isCurrentlyLiked ? Math.max(0, currentCount - 1) : currentCount + 1;
+
+  const overrides = getPostOverrides();
+  overrides[postId] = { ...overrides[postId], likeCount: newCount };
+  savePostOverrides(overrides);
+
+  return { liked: !isCurrentlyLiked, count: newCount };
 }
 
 // 클라이언트 전용: 필터링된 로컬 게시글 (Server Component에서는 빈 배열 반환)

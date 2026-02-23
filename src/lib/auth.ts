@@ -4,7 +4,7 @@
 // ============================================================
 
 import { STORAGE_KEYS } from '@/lib/constants';
-import { mockUsers } from '@/data/users';
+import { mockUsers, getProfileOverrides } from '@/data/users';
 import { universities } from '@/data/universities';
 import type { User, MemberType } from '@/lib/types';
 
@@ -54,9 +54,15 @@ function saveRegisteredUsers(users: RegisteredUser[]) {
 // ── 유저 검색 ──
 
 export function getFullUser(userId: string): User | null {
-  // 1. mockUsers에서 찾기
+  // 1. mockUsers에서 찾기 (오버라이드 병합)
   const mock = mockUsers.find(u => u.id === userId);
-  if (mock) return mock;
+  if (mock) {
+    const override = getProfileOverrides(userId);
+    if (override) {
+      return { ...mock, ...override };
+    }
+    return mock;
+  }
 
   // 2. localStorage 가입유저에서 찾기
   const registered = getRegisteredUsers().find(u => u.id === userId);
@@ -173,6 +179,68 @@ export function mockSignup(data: SignupData): AuthResult {
   localStorage.setItem(STORAGE_KEYS.CURRENT_USER, newUser.id);
 
   return { success: true, userId: newUser.id };
+}
+
+// ── 프로필 수정 ──
+
+export interface ProfileUpdateData {
+  nickname?: string;
+  department?: string | null;
+  memberType?: MemberType;
+}
+
+export function mockUpdateProfile(userId: string, data: ProfileUpdateData): AuthResult {
+  const trimmedNickname = data.nickname?.trim();
+
+  // 닉네임 변경 시 유효성 + 중복 체크
+  if (trimmedNickname !== undefined) {
+    if (!trimmedNickname) return { success: false, error: '닉네임을 입력하세요' };
+
+    // mockUsers에서 중복 확인 (본인 제외, 오버라이드 반영)
+    for (const u of mockUsers) {
+      if (u.id === userId) continue;
+      const override = getProfileOverrides(u.id);
+      const currentNick = override?.nickname ?? u.nickname;
+      if (currentNick === trimmedNickname) {
+        return { success: false, error: '이미 사용 중인 닉네임입니다' };
+      }
+    }
+
+    // registeredUsers에서 중복 확인 (본인 제외)
+    const registeredUsers = getRegisteredUsers();
+    if (registeredUsers.some(u => u.id !== userId && u.nickname === trimmedNickname)) {
+      return { success: false, error: '이미 사용 중인 닉네임입니다' };
+    }
+  }
+
+  // mockUser인 경우: 오버라이드 저장
+  const isMockUser = mockUsers.some(u => u.id === userId);
+  if (isMockUser) {
+    const allOverrides: Record<string, Record<string, unknown>> = (() => {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEYS.PROFILE_OVERRIDES) || '{}');
+      } catch { return {}; }
+    })();
+    const current = allOverrides[userId] || {};
+    if (trimmedNickname !== undefined) current.nickname = trimmedNickname;
+    if (data.department !== undefined) current.department = data.department;
+    if (data.memberType !== undefined) current.memberType = data.memberType;
+    allOverrides[userId] = current;
+    localStorage.setItem(STORAGE_KEYS.PROFILE_OVERRIDES, JSON.stringify(allOverrides));
+    return { success: true, userId };
+  }
+
+  // registeredUser인 경우: 직접 업데이트
+  const registeredUsers = getRegisteredUsers();
+  const idx = registeredUsers.findIndex(u => u.id === userId);
+  if (idx === -1) return { success: false, error: '사용자를 찾을 수 없습니다' };
+
+  if (trimmedNickname !== undefined) registeredUsers[idx].nickname = trimmedNickname;
+  if (data.department !== undefined) registeredUsers[idx].department = data.department;
+  if (data.memberType !== undefined) registeredUsers[idx].memberType = data.memberType;
+
+  saveRegisteredUsers(registeredUsers);
+  return { success: true, userId };
 }
 
 // ── 로그아웃 ──

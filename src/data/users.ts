@@ -1,4 +1,24 @@
-import type { User, UserSummary } from '@/lib/types';
+import type { User, UserSummary, MemberType } from '@/lib/types';
+import { STORAGE_KEYS } from '@/lib/constants';
+
+interface ProfileOverride {
+  nickname?: string;
+  department?: string | null;
+  memberType?: MemberType;
+}
+
+/** mockUsers의 프로필 수정 사항을 localStorage에서 가져옴 */
+export function getProfileOverrides(userId: string): ProfileOverride | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const all: Record<string, ProfileOverride> = JSON.parse(
+      localStorage.getItem(STORAGE_KEYS.PROFILE_OVERRIDES) || '{}'
+    );
+    return all[userId] ?? null;
+  } catch {
+    return null;
+  }
+}
 
 export const mockUsers: User[] = [
   { id: 'u1', email: 'seo@snu.ac.kr', nickname: '서연이', avatarUrl: null, role: 'user', memberType: 'undergraduate', universityId: 1, department: '경영학과', isVerified: true, verifiedAt: '2025-09-01', mannerTemp: 38.2, tradeCount: 12, createdAt: '2025-09-01' },
@@ -17,9 +37,10 @@ export const mockUsers: User[] = [
 export function getUserSummary(userId: string): UserSummary {
   const user = mockUsers.find(u => u.id === userId);
   if (user) {
+    const override = getProfileOverrides(userId);
     return {
       id: user.id,
-      nickname: user.nickname,
+      nickname: override?.nickname ?? user.nickname,
       avatarUrl: user.avatarUrl,
       isVerified: user.isVerified,
       mannerTemp: user.mannerTemp,

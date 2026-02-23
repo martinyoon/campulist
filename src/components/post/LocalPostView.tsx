@@ -114,7 +114,7 @@ export default function LocalPostView({ id }: LocalPostViewProps) {
 
         <div className="mt-1 flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            {formatRelativeTime(post.createdAt)} · 조회 <ViewCountTracker postId={post.id} initialCount={post.viewCount} /> · 찜 {post.likeCount}
+            {formatRelativeTime(post.createdAt)} · 조회 <ViewCountTracker postId={post.id} initialCount={post.viewCount} />
           </p>
           <ReportButton postId={post.id} />
         </div>
@@ -167,7 +167,7 @@ export default function LocalPostView({ id }: LocalPostViewProps) {
       {/* 하단 고정 바 */}
       <div className="fixed bottom-0 left-0 right-0 z-10 border-t border-border bg-background px-4 py-3">
         <div className="mx-auto flex max-w-5xl items-center gap-3">
-          <LikeButton postId={post.id} initialLiked={post.isLiked} />
+          <LikeButton postId={post.id} initialLiked={post.isLiked} initialCount={post.likeCount} />
           <ShareButton />
           <div className="flex-1">
             <p className="text-lg font-bold">{formatPrice(post.price)}</p>
