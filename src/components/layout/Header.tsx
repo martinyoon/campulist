@@ -10,7 +10,7 @@ import ThemeToggle from '@/components/ThemeToggle';
 import IconToggle from '@/components/IconToggle';
 import { universities } from '@/data/universities';
 import { majorCategories } from '@/data/categories';
-import { getMyUnreadCount } from '@/lib/camnotif';
+import { getMyUnreadTotal } from '@/lib/camtalk';
 import { useAuth } from '@/contexts/AuthContext';
 import { getWriteUrl } from '@/lib/writeUrl';
 
@@ -24,10 +24,10 @@ export default function Header() {
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
-    const update = () => setUnreadCount(user ? getMyUnreadCount(user.id) : 0);
+    const update = () => setUnreadCount(user ? getMyUnreadTotal(user.id) : 0);
     update();
-    window.addEventListener('camnotifUpdate', update);
-    return () => window.removeEventListener('camnotifUpdate', update);
+    window.addEventListener('camtalkUpdate', update);
+    return () => window.removeEventListener('camtalkUpdate', update);
   }, [user]);
 
   const handleSearch = (e: React.FormEvent) => {
@@ -103,9 +103,9 @@ export default function Header() {
                   글쓰기
                 </Button>
               </Link>
-              <Link href="/camnotif" className="relative">
-                <Button variant="ghost" size="sm" className="text-xs font-medium">
-                  캠알림
+              <Link href="/camtalk" className="relative">
+                <Button variant="ghost" size="icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
                 </Button>
                 {unreadCount > 0 && (
                   <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
