@@ -42,7 +42,7 @@ export default function PostBottomAction({ postId, postTitle, postPrice, postThu
   if (isOwner) {
     const handleBump = () => {
       bumpPost(postId);
-      toast('게시글이 끌어올려졌습니다');
+      toast('게시글이 목록 맨 위로 올라갔습니다! 더 많은 사람들이 볼 수 있어요.');
     };
 
     return (
